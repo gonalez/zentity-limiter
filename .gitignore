@@ -1,0 +1,7 @@
+.gitignore
+
+target
+build/
+
+.idea
+.gradle
