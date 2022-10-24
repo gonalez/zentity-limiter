@@ -15,11 +15,29 @@
  */
 package io.github.gonalez.zfarmlimiter.rule;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 
 /** Interface for serialize and deserialize rules. */
 public interface RuleSerializer {
+  @FunctionalInterface
+  interface Visitor {
+    static Visitor of(Visitor... visitors) {
+      return (rule, name, valueType, value) -> {
+        for (Visitor visitor : visitors) {
+          visitor.visitValue(rule, name, valueType, value);
+        }
+      };
+    }
+
+    void visitValue(
+        Rule rule, String valueName,
+        Class<?> valueType, Object value);
+  }
+
+  default void addListener(RuleSerializerListener listener) {}
+
   void serialize(Rule rule, RuleSerializerContext context) throws IOException;
 
-  Rule deserialize(RuleSerializerContext context) throws IOException;
+  Rule deserialize(RuleSerializerContext context, @Nullable Visitor visitor) throws IOException;
 }

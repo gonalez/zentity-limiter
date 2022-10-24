@@ -35,4 +35,9 @@ public class DelegatingRuleSerializerContext implements RuleSerializerContext {
   public <T> Iterable<T> getAll(String key, Class<T> type) {
     return objectRegistry.getAll(key, type);
   }
+
+  @Override
+  public void merge(Builder objectRegistryBuilder) {
+    objectRegistry.merge(objectRegistryBuilder);
+  }
 }

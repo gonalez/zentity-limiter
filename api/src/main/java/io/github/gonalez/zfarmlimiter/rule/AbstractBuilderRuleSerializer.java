@@ -17,7 +17,6 @@ package io.github.gonalez.zfarmlimiter.rule;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.github.gonalez.zfarmlimiter.util.Pair;
@@ -33,12 +32,13 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
   // Defines which characters a rule builder method should start with
-  private static final String SET_BUILDER_METHOD_START = "set";
+  static final String SET_BUILDER_METHOD_START = "set";
 
   private static final ImmutableSet<Method> IGNORED =
       ImmutableSet.<Method>builder()
@@ -49,7 +49,14 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
 
   private final ImmutableMap<String, Method> builderMethods;
 
-  public AbstractBuilderRuleSerializer() {
+  private final ImmutableSet<Method> ruleMethods;
+
+  private final CopyOnWriteArrayList<RuleSerializerListener> listeners = new CopyOnWriteArrayList<>();
+
+  private final boolean checkForMissingFields;
+
+  public AbstractBuilderRuleSerializer(boolean checkForMissingFields) {
+    this.checkForMissingFields = checkForMissingFields;
     Class<? extends Rule> ruleClass = ruleType();
 
     builderRuleMethodPair =
@@ -72,9 +79,12 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
         "%s must have no parameters", buildRuleMethod);
 
     ImmutableMap<String, Method> newBuilderMethods = findMethodsIgnoring(buildRuleMethod.getDeclaringClass());
-    ImmutableMap.Builder<String, Method> builder = ImmutableMap.builder();
+    ImmutableMap<String, Method> ruleMethods = findMethodsIgnoring(ruleClass);
 
-    for (Map.Entry<String, Method> entry : findMethodsIgnoring(ruleClass).entrySet()) {
+    this.ruleMethods = ImmutableSet.copyOf(ruleMethods.values());
+
+    ImmutableMap.Builder<String, Method> builder = ImmutableMap.builder();
+    for (Map.Entry<String, Method> entry : ruleMethods.entrySet()) {
       String capitalizedMethodName = capitalize(entry.getKey());
 
       Method maybeFindBuilderMethod = newBuilderMethods.get(SET_BUILDER_METHOD_START + capitalizedMethodName);
@@ -91,6 +101,15 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
       builder.put(entry.getKey(), maybeFindBuilderMethod);
     }
     this.builderMethods = builder.build();
+  }
+
+  @Override
+  public void addListener(RuleSerializerListener listener) {
+    listeners.add(listener);
+  }
+
+  protected ImmutableSet<Method> getRuleMethods() {
+    return ruleMethods;
   }
 
   /** The type of rule that this serializer expects. */
@@ -133,17 +152,37 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
   }
 
   @Override
-  public Rule deserialize(RuleSerializerContext context) throws IOException {
+  public void serialize(Rule rule, RuleSerializerContext context) throws IOException {
+
+  }
+
+  @Override
+  public Rule deserialize(RuleSerializerContext context, @Nullable Visitor visitor) throws IOException {
     try {
       Object newBuilder = builderRuleMethodPair.getKey().invoke(null);
+      ImmutableMap.Builder<String, Pair<Class<?>, Object>> readFields = ImmutableMap.builder();
       for (Map.Entry<String, Method> entry : builderMethods.entrySet()) {
-        Object maybeFind = context.get(entry.getKey(), entry.getValue().getParameterTypes()[0]);
+        Class<?> needsType = entry.getValue().getParameterTypes()[0];
+        Object maybeFind = context.get(entry.getKey(), needsType);
         if (maybeFind == null) {
-          throw new IOException("Could not find a value for rule property: " + entry.getKey());
+          if (checkForMissingFields) {
+            throw new IOException("Could not find a value for rule property: " + entry.getKey());
+          }
+          continue;
         }
         entry.getValue().invoke(newBuilder, maybeFind);
       }
-      return (Rule) builderRuleMethodPair.getValue().invoke(newBuilder);
+      Rule rule = (Rule) builderRuleMethodPair.getValue().invoke(newBuilder);
+      for (Method method : ruleMethods) {
+        Object invoke = method.invoke(rule);
+        if (visitor != null) {
+          visitor.visitValue(rule, method.getName(), invoke.getClass(), invoke);
+        }
+      }
+      for (RuleSerializerListener listener : listeners) {
+        listener.onDeserialize(rule, context);
+      }
+      return rule;
     } catch (IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }

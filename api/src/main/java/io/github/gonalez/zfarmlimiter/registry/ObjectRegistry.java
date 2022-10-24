@@ -17,8 +17,13 @@ package io.github.gonalez.zfarmlimiter.registry;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.SetMultimap;
 import io.github.gonalez.zfarmlimiter.util.Pair;
+
+import java.util.Map;
 
 /** An object type registry. */
 public interface ObjectRegistry {
@@ -29,14 +34,17 @@ public interface ObjectRegistry {
   <T> T get(String key, Class<T> type);
   <T> Iterable<T> getAll(String key, Class<T> type);
 
+  /** Merges {@code this} values into the given ObjectRegistry builder. */
+  void merge(ObjectRegistry.Builder objectRegistryBuilder);
+
   interface Builder {
     <T> Builder add(String name, Class<T> type, T value);
 
     ObjectRegistry build();
 
     final class DefaultObjectRegistryBuilder implements Builder {
-      private final ImmutableMultimap.Builder<Class<?>,
-          Pair<String, Object>> values = ImmutableMultimap.builder();
+      private final SetMultimap<Class<?>,
+          Pair<String, Object>> values = LinkedHashMultimap.create();
 
       @Override
       public <T> Builder add(String name, Class<T> type, T value) {
@@ -45,7 +53,6 @@ public interface ObjectRegistry {
       }
 
       public ObjectRegistry build() {
-        ImmutableMultimap<Class<?>, Pair<String, Object>> build = values.build();
         return new ObjectRegistry() {
           @Override
           public <T> T get(String key, Class<T> type) {
@@ -56,12 +63,21 @@ public interface ObjectRegistry {
           @Override
           public <T> Iterable<T> getAll(String key, Class<T> type) {
             ImmutableList.Builder<T> builder = ImmutableList.builder();
-            for (Pair<String, Object> get : build.get(type)) {
+            for (Pair<String, Object> get : values.get(type)) {
               if (get.getKey().equals(key)) {
                 builder.add((T) get.getValue());
               }
             }
             return builder.build();
+          }
+
+          @SuppressWarnings("unchecked")
+          @Override
+          public void merge(Builder objectRegistryBuilder) {
+            for (Map.Entry<Class<?>, Pair<String, Object>> entry : values.entries()) {
+              Pair<String, Object> value = entry.getValue();
+              objectRegistryBuilder.add(value.getKey(), (Class) entry.getKey(), value.getValue());
+            }
           }
         };
       }

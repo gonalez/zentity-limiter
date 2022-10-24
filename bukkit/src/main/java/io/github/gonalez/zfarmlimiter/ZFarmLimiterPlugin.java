@@ -15,13 +15,34 @@
  */
 package io.github.gonalez.zfarmlimiter;
 
-import org.bukkit.event.Listener;
+import io.github.gonalez.zfarmlimiter.rule.FileWritingRuleSerializer;
+import io.github.gonalez.zfarmlimiter.rule.RuleCollection;
+import io.github.gonalez.zfarmlimiter.rule.RuleSerializerListeningRuleCollection;
+import io.github.gonalez.zfarmlimiter.rule.YamlConfigurationRuleSerializer;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class ZFarmLimiterPlugin extends JavaPlugin implements Listener {
+import java.io.IOException;
+
+/** The main class of the ZFarm Limiter plugin. */
+public class ZFarmLimiterPlugin extends JavaPlugin {
 
   @Override
   public void onEnable() {
     saveDefaultConfig();
+
+    try {
+      FileWritingRuleSerializer ruleSerializer =
+          new YamlConfigurationRuleSerializer(
+              false,
+              getDataFolder().toPath().resolve("rules"),
+              true);
+
+      RuleCollection ruleCollection =
+          new RuleSerializerListeningRuleCollection(ruleSerializer);
+
+      ruleSerializer.init();
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot initialize plugin", e);
+    }
   }
 }

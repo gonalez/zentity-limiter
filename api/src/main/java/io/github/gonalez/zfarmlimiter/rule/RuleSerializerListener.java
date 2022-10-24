@@ -15,12 +15,8 @@
  */
 package io.github.gonalez.zfarmlimiter.rule;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-
-/** A set of {@link Rule}s. */
-public interface RuleCollection {
-  ImmutableSet<Rule> getRules();
-
-  void invalidateCaches();
+/** Interface invoked when serializing and deserializing rules via the {@link RuleSerializer}. */
+public interface RuleSerializerListener {
+  default void onSerialize(Rule rule, RuleSerializerContext context) {}
+  default void onDeserialize(Rule rule, RuleSerializerContext context) {}
 }

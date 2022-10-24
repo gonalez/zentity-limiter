@@ -16,7 +16,7 @@
 package io.github.gonalez.zfarmlimiter.rule;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 
 @AutoValue
 public abstract class Rule {
@@ -24,16 +24,16 @@ public abstract class Rule {
     return new AutoValue_Rule.Builder();
   }
 
-  public abstract ImmutableSet<String> entities();
-  public abstract ImmutableSet<String> allowedWorlds();
+  public abstract ImmutableList<String> entities();
+  public abstract ImmutableList<String> allowedWorlds();
 
   public abstract double radius();
   public abstract int maxAmount();
 
   @AutoValue.Builder
   public abstract static class Builder {
-    public abstract Builder setEntities(ImmutableSet<String> entities);
-    public abstract Builder setAllowedWorlds(ImmutableSet<String> allowedWorlds);
+    public abstract Builder setEntities(ImmutableList<String> entities);
+    public abstract Builder setAllowedWorlds(ImmutableList<String> allowedWorlds);
 
     public abstract Builder setRadius(double radius);
     public abstract Builder setMaxAmount(int maxAmount);
