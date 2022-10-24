@@ -67,9 +67,9 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
     checkState(Modifier.isStatic(builderRuleMethod.getModifiers()),
         "%s must be static", builderRuleMethod);
     checkState(builderRuleMethod.getParameterTypes().length == 0,
-        "%s must have only one parameter", builderRuleMethod);
+        "%s must have no parameters", builderRuleMethod);
     checkState(buildRuleMethod.getParameterTypes().length == 0,
-        "%s must have only one parameter", buildRuleMethod);
+        "%s must have no parameters", buildRuleMethod);
 
     ImmutableMap<String, Method> newBuilderMethods = findMethodsIgnoring(buildRuleMethod.getDeclaringClass());
     ImmutableMap.Builder<String, Method> builder = ImmutableMap.builder();
