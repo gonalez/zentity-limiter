@@ -15,6 +15,8 @@
  */
 package io.github.gonalez.zfarmlimiter.rule;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -43,14 +45,14 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
           .add(Object.class.getDeclaredMethods())
           .build();
 
-  private final Pair<Method, Method> buildRuleMethod;
+  private final Pair</*builder=*/Method, /*rule=*/Method> builderRuleMethodPair;
 
   private final ImmutableMap<String, Method> builderMethods;
 
   public AbstractBuilderRuleSerializer() {
     Class<? extends Rule> ruleClass = ruleType();
 
-    buildRuleMethod =
+    builderRuleMethodPair =
         Arrays.stream(ruleClass.getDeclaredMethods())
             .map(method ->
                 recursivelyFindMethodForReturnType(new HashSet<>(), method, ruleClass))
@@ -58,12 +60,18 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
             .findFirst()
             .orElseThrow(
                 () -> new NoSuchElementException("No builder method found for rule: " + ruleClass));
-    Preconditions.checkState(buildRuleMethod.getKey().getParameterTypes().length == 0,
-        "%s must have only one parameter", buildRuleMethod.getKey());
-    Preconditions.checkState(buildRuleMethod.getValue().getParameterTypes().length == 0,
-        "%s must have only one parameter", buildRuleMethod.getValue());
 
-    ImmutableMap<String, Method> newBuilderMethods = findMethodsIgnoring(buildRuleMethod.getValue().getDeclaringClass());
+    Method builderRuleMethod = builderRuleMethodPair.getKey();
+    Method buildRuleMethod = builderRuleMethodPair.getValue();
+
+    checkState(Modifier.isStatic(builderRuleMethod.getModifiers()),
+        "%s must be static", builderRuleMethod);
+    checkState(builderRuleMethod.getParameterTypes().length == 0,
+        "%s must have only one parameter", builderRuleMethod);
+    checkState(buildRuleMethod.getParameterTypes().length == 0,
+        "%s must have only one parameter", buildRuleMethod);
+
+    ImmutableMap<String, Method> newBuilderMethods = findMethodsIgnoring(buildRuleMethod.getDeclaringClass());
     ImmutableMap.Builder<String, Method> builder = ImmutableMap.builder();
 
     for (Map.Entry<String, Method> entry : findMethodsIgnoring(ruleClass).entrySet()) {
@@ -74,10 +82,10 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
         throw new IllegalStateException(SET_BUILDER_METHOD_START + capitalizedMethodName);
       }
 
-      Preconditions.checkState(maybeFindBuilderMethod.getParameterTypes().length == 1,
+      checkState(maybeFindBuilderMethod.getParameterTypes().length == 1,
           "%s must have only one parameter", maybeFindBuilderMethod);
       Class<?> builderParameterType = maybeFindBuilderMethod.getParameterTypes()[0];
-      Preconditions.checkState(builderParameterType == entry.getValue().getReturnType(),
+      checkState(builderParameterType == entry.getValue().getReturnType(),
           "parameter %s must assignable with %s",
           builderParameterType, entry.getValue().getReturnType());
       builder.put(entry.getKey(), maybeFindBuilderMethod);
@@ -127,7 +135,7 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
   @Override
   public Rule deserialize(RuleSerializerContext context) throws IOException {
     try {
-      Object newBuilder = buildRuleMethod.getKey().invoke(null);
+      Object newBuilder = builderRuleMethodPair.getKey().invoke(null);
       for (Map.Entry<String, Method> entry : builderMethods.entrySet()) {
         Object maybeFind = context.get(entry.getKey(), entry.getValue().getParameterTypes()[0]);
         if (maybeFind == null) {
@@ -135,7 +143,7 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
         }
         entry.getValue().invoke(newBuilder, maybeFind);
       }
-      return (Rule) buildRuleMethod.getValue().invoke(newBuilder);
+      return (Rule) builderRuleMethodPair.getValue().invoke(newBuilder);
     } catch (IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
