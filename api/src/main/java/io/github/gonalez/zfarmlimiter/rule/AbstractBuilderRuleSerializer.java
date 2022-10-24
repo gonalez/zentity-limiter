@@ -57,8 +57,7 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
             .filter(Objects::nonNull)
             .findFirst()
             .orElseThrow(
-                () ->
-                    new NoSuchElementException("No builder method found for rule: " + ruleClass));
+                () -> new NoSuchElementException("No builder method found for rule: " + ruleClass));
     Preconditions.checkState(buildRuleMethod.getKey().getParameterTypes().length == 0,
         "%s must have only one parameter", buildRuleMethod.getKey());
     Preconditions.checkState(buildRuleMethod.getValue().getParameterTypes().length == 0,
