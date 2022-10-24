@@ -13,15 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zfarmlimiter;
+package io.github.gonalez.zfarmlimiter.rule;
 
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public class ZFarmLimiterPlugin extends JavaPlugin implements Listener {
+import io.github.gonalez.zfarmlimiter.registry.ObjectRegistry;
+
+public class DelegatingRuleSerializerContext implements RuleSerializerContext {
+  private final ObjectRegistry objectRegistry;
+
+  public DelegatingRuleSerializerContext(ObjectRegistry objectRegistry) {
+    this.objectRegistry = checkNotNull(objectRegistry);
+  }
 
   @Override
-  public void onEnable() {
-    saveDefaultConfig();
+  public <T> T get(String key, Class<T> type) {
+    return objectRegistry.get(key, type);
+  }
+
+  @Override
+  public <T> Iterable<T> getAll(String key, Class<T> type) {
+    return objectRegistry.getAll(key, type);
   }
 }

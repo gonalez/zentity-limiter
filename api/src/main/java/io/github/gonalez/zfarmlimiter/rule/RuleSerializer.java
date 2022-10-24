@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zfarmlimiter;
+package io.github.gonalez.zfarmlimiter.rule;
 
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
+import java.io.IOException;
 
-public class ZFarmLimiterPlugin extends JavaPlugin implements Listener {
+/** Interface for serialize and deserialize rules. */
+public interface RuleSerializer {
+  void serialize(Rule rule, RuleSerializerContext context) throws IOException;
 
-  @Override
-  public void onEnable() {
-    saveDefaultConfig();
-  }
+  Rule deserialize(RuleSerializerContext context) throws IOException;
 }

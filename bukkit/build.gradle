@@ -8,3 +8,7 @@ dependencies {
     implementation project(':api')
     compileOnly(libs['maven.org_spigotmc_spigot_api'])
 }
+
+shadowJar {
+    classifier = null
+}

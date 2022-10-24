@@ -1,0 +1,3 @@
+name: ZFarmLimiter
+main: io.github.gonalez.zfarmlimiter.ZFarmLimiterPlugin
+version: 0.0.1-SNAPSHOT

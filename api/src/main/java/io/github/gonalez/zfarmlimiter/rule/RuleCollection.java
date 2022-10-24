@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zfarmlimiter;
+package io.github.gonalez.zfarmlimiter.rule;
 
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.google.common.collect.ImmutableList;
 
-public class ZFarmLimiterPlugin extends JavaPlugin implements Listener {
+/** A set of {@link Rule}s. */
+public interface RuleCollection {
+  ImmutableList<Rule> getRules();
 
-  @Override
-  public void onEnable() {
-    saveDefaultConfig();
-  }
+  void invalidateCache();
 }

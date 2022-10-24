@@ -17,6 +17,7 @@ package io.github.gonalez.zfarmlimiter.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.reflect.TypeToken;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
