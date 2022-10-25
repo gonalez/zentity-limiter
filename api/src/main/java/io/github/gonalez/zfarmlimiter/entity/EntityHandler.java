@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.github.gonalez.zfarmlimiter.entity;
 
 import org.bukkit.entity.Entity;
 
+/** Interface for handling entities. */
 public interface EntityHandler {
+  /** Handles the given entity. */
   void handle(Entity entity);
 }
