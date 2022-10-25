@@ -18,23 +18,44 @@ package io.github.gonalez.zfarmlimiter.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+
+import java.util.Map;
 
 /** Default, basic implementation for {@link RuleDescription}. */
 public class DefaultRuleDescription implements RuleDescription {
+  private final EntityExtractorFilterFactory filterFactory;
   private final Rule rule;
 
-  public DefaultRuleDescription(Rule rule) {
+  private final ImmutableMap<EntityExtractor.Filter<?>, Boolean> filters;
+
+  public DefaultRuleDescription(
+      EntityExtractorFilterFactory filterFactory, Rule rule) {
+    this.filterFactory = checkNotNull(filterFactory);
     this.rule = checkNotNull(rule);
+    filters = loadFilters();
+  }
+
+  private ImmutableMap<EntityExtractor.Filter<?>, Boolean> loadFilters() {
+    ImmutableMap.Builder<EntityExtractor.Filter<?>, Boolean> filters = ImmutableMap.builder();
+    for (String allowedEntities : rule.allowedEntities()) {
+      filters.put(EntityExtractorFilters.isEntityType(EntityType.valueOf(allowedEntities)), false);
+    }
+    for (Map.Entry<String, Object> optionEntry : rule.options().entrySet()) {
+      EntityExtractor.Filter<?> maybeCreateFilter =
+          filterFactory.createFilter(optionEntry.getKey(), optionEntry.getValue());
+      if (maybeCreateFilter != null) {
+        filters.put(maybeCreateFilter, true);
+      }
+    }
+    return filters.build();
   }
 
   @Override
-  public ImmutableList<EntityExtractor.Filter> getFilters() {
-    ImmutableList.Builder<EntityExtractor.Filter> filters = ImmutableList.builder();
-    for (String allowedEntities : rule.allowedEntities()) {
-      filters.add(EntityExtractorFilters.isEntityType(EntityType.valueOf(allowedEntities)));
-    }
-    return filters.build();
+  public ImmutableMap<EntityExtractor.Filter<?>, Boolean> getFilters() {
+    return filters;
   }
 }

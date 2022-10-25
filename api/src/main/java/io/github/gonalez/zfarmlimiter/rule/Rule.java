@@ -17,6 +17,7 @@ package io.github.gonalez.zfarmlimiter.rule;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 @AutoValue
 public abstract class Rule {
@@ -25,7 +26,8 @@ public abstract class Rule {
         .setAllowedEntities(ImmutableList.of("VILLAGER"))
         .setAllowedWorlds(ImmutableList.of())
         .setRadius(3)
-        .setMaxAmount(5);
+        .setMaxAmount(5)
+        .setOptions(ImmutableMap.of("tamed", true));
   }
 
   public abstract ImmutableList<String> allowedEntities();
@@ -34,6 +36,8 @@ public abstract class Rule {
   public abstract double radius();
   public abstract int maxAmount();
 
+  public abstract ImmutableMap<String, Object> options();
+
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setAllowedEntities(ImmutableList<String> allowedEntities);
@@ -41,6 +45,8 @@ public abstract class Rule {
 
     public abstract Builder setRadius(double radius);
     public abstract Builder setMaxAmount(int maxAmount);
+
+    public abstract Builder setOptions(ImmutableMap<String, Object> options);
 
     public abstract Rule build();
   }

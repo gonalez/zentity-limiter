@@ -13,19 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zfarmlimiter.entity;
+package io.github.gonalez.zfarmlimiter.util.converter;
 
-import com.google.common.collect.ImmutableMap;
-import io.github.gonalez.zfarmlimiter.rule.Rule;
+import org.bukkit.configuration.MemorySection;
 
-import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
-/** Contains more information about an {@link io.github.gonalez.zfarmlimiter.rule.Rule}. */
-public interface RuleDescription {
-  interface Provider {
-    @Nullable
-    RuleDescription provide(Rule rule);
+
+public class MemorySectionMapConverter implements ObjectConverter<MemorySection, Map> {
+  @Override
+  public Class<MemorySection> requiredType() {
+    return MemorySection.class;
   }
 
-  ImmutableMap<EntityExtractor.Filter<?>, Boolean> getFilters();
+  @Override
+  public Class<Map> convertedType() {
+    return Map.class;
+  }
+
+  @Override
+  public Map<?, ?> convert(MemorySection key) {
+    Map map = new HashMap<>();
+    for (String sectionKey : key.getKeys(true)) {
+      map.put(sectionKey, key.get(sectionKey));
+    }
+    return map;
+  }
 }

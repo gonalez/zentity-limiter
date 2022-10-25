@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zfarmlimiter.entity.filter;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+package io.github.gonalez.zfarmlimiter.entity.filter;
 
 import io.github.gonalez.zfarmlimiter.entity.EntityExtractor;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 
-/** A {@link EntityExtractor.Filter} which compares whether the entity type is compatible with another. */
-public class EntityTypeExtractorFilter implements EntityExtractor.Filter<Entity> {
-  private final EntityType entityType;
+public class EntityIsNamedExtractorFilter implements EntityExtractor.Filter<Entity> {
+  private final boolean named;
 
-  public EntityTypeExtractorFilter(EntityType entityType) {
-    this.entityType = checkNotNull(entityType);
+  public EntityIsNamedExtractorFilter(boolean named) {
+    this.named = named;
   }
 
   @Override
@@ -36,11 +33,11 @@ public class EntityTypeExtractorFilter implements EntityExtractor.Filter<Entity>
 
   @Override
   public String getName() {
-    return "entity_type";
+    return "named";
   }
 
   @Override
-  public boolean allowed(Entity entity) {
-    return entity.getType() == entityType;
+  public boolean allowed(Entity type) {
+    return !named || type.getCustomName() != null;
   }
 }

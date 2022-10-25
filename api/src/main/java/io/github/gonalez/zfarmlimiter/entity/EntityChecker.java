@@ -27,6 +27,8 @@ public interface EntityChecker {
     SUCCEED,
     // Some error or failure
     FAILED,
+    // Event was cancelled
+    EVENT_CANCELLED,
     // The number of entities found is less than the limit set by the rule
     TOO_FEW_ENTITIES,
   }

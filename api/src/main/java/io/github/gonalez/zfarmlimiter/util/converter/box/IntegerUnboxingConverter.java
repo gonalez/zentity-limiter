@@ -13,19 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zfarmlimiter.entity;
 
-import com.google.common.collect.ImmutableMap;
-import io.github.gonalez.zfarmlimiter.rule.Rule;
+package io.github.gonalez.zfarmlimiter.util.converter.box;
 
-import javax.annotation.Nullable;
+import io.github.gonalez.zfarmlimiter.util.converter.ObjectConverter;
 
-/** Contains more information about an {@link io.github.gonalez.zfarmlimiter.rule.Rule}. */
-public interface RuleDescription {
-  interface Provider {
-    @Nullable
-    RuleDescription provide(Rule rule);
+public class IntegerUnboxingConverter implements ObjectConverter<Integer, Integer> {
+  @Override
+  public Class<Integer> requiredType() {
+    return Integer.class;
   }
 
-  ImmutableMap<EntityExtractor.Filter<?>, Boolean> getFilters();
+  @Override
+  public Class<Integer> convertedType() {
+    return int.class;
+  }
+
+  @Override
+  public Integer convert(Integer key) {
+    return key;
+  }
 }

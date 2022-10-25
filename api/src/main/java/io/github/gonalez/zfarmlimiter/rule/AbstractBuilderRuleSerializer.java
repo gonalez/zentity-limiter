@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.github.gonalez.zfarmlimiter.util.converter.ObjectConverter;
 import io.github.gonalez.zfarmlimiter.util.Pair;
+import org.bukkit.configuration.MemorySection;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -188,11 +189,8 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
         }
         Class<?> valueClass = maybeFind.getClass();
         if (!needsType.isAssignableFrom(valueClass)) {
-          ObjectConverter converter =
-              objectConverterRegistry.findConverter(valueClass, needsType);
-          if (converter != null) {
-            maybeFind = converter.convert(maybeFind);
-          }
+          Set<Class<?>> analyzedClasses = new HashSet<>();
+          maybeFind = recursivelyFindConverter(analyzedClasses, maybeFind, needsType);
         }
         entry.getValue().invoke(newBuilder, maybeFind);
       }
@@ -210,5 +208,22 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
     } catch (IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private Object recursivelyFindConverter(
+      Set<Class<?>> analyzedClasses, Object value, Class<?> clazz) {
+    Class<?> valueClass = value.getClass();
+    if (analyzedClasses.contains(valueClass)) {
+      return value;
+    }
+    analyzedClasses.add(valueClass);
+    if (!clazz.isAssignableFrom(valueClass)) {
+      ObjectConverter converter = objectConverterRegistry.findConverter(valueClass, clazz);
+      if (converter != null) {
+        value = converter.convert(value);
+        return recursivelyFindConverter(analyzedClasses, value, clazz);
+      }
+    }
+    return value;
   }
 }

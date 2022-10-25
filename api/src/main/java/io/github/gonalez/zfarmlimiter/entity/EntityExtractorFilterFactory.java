@@ -15,17 +15,10 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
-import com.google.common.collect.ImmutableMap;
-import io.github.gonalez.zfarmlimiter.rule.Rule;
-
 import javax.annotation.Nullable;
 
-/** Contains more information about an {@link io.github.gonalez.zfarmlimiter.rule.Rule}. */
-public interface RuleDescription {
-  interface Provider {
-    @Nullable
-    RuleDescription provide(Rule rule);
-  }
-
-  ImmutableMap<EntityExtractor.Filter<?>, Boolean> getFilters();
+/** Factory to create {@link EntityExtractor.Filter} instances. */
+public interface EntityExtractorFilterFactory {
+  @Nullable
+  EntityExtractor.Filter<?> createFilter(String name, Object value);
 }

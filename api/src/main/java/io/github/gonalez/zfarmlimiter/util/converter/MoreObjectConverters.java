@@ -15,12 +15,21 @@
  */
 package io.github.gonalez.zfarmlimiter.util.converter;
 
+import io.github.gonalez.zfarmlimiter.util.converter.box.BooleanUnboxingConverter;
+import io.github.gonalez.zfarmlimiter.util.converter.box.IntegerUnboxingConverter;
+
 /** Helper class to ease the use of {@link ObjectConverter}s. */
 public final class MoreObjectConverters {
-  /** A {@link ObjectConverter.Registry} which adds converters for the immutable collections on Guava */
+  /** A {@link ObjectConverter.Registry} which adds converters for the immutable collections and more. */
   public static final ObjectConverter.Registry DEFAULT_REGISTRY =
       ObjectConverter.Registry.newBuilder()
           .addConverter(new ImmutableListConverter<>())
+          .addConverter(new ImmutableMapConverter<>())
+          // yaml configuration converters
+          .addConverter(new MemorySectionMapConverter())
+          // wrapper type unboxing converters
+          .addConverter(new BooleanUnboxingConverter())
+          .addConverter(new IntegerUnboxingConverter())
           .build();
 
   private MoreObjectConverters() {}

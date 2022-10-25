@@ -13,19 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zfarmlimiter.entity;
+
+package io.github.gonalez.zfarmlimiter.util.converter;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.gonalez.zfarmlimiter.rule.Rule;
 
-import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
 
-/** Contains more information about an {@link io.github.gonalez.zfarmlimiter.rule.Rule}. */
-public interface RuleDescription {
-  interface Provider {
-    @Nullable
-    RuleDescription provide(Rule rule);
+@SuppressWarnings("unchecked")
+public class ImmutableMapConverter<K, V> implements ObjectConverter<Map<K, V>, ImmutableMap<K, V>> {
+  @Override
+  public Class<Map<K, V>> requiredType() {
+    return (Class<Map<K, V>>) ((Class<?>) Map.class);
   }
 
-  ImmutableMap<EntityExtractor.Filter<?>, Boolean> getFilters();
+  @Override
+  public Class<ImmutableMap<K, V>> convertedType() {
+    return (Class<ImmutableMap<K, V>>) ((Class<?>) ImmutableMap.class);
+  }
+
+  @Override
+  public ImmutableMap<K, V> convert(Map<K, V> key) {
+    return ImmutableMap.copyOf(key);
+  }
 }

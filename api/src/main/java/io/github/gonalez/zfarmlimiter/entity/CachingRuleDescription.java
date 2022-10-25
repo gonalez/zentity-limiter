@@ -15,34 +15,30 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import io.github.gonalez.zfarmlimiter.rule.Rule;
 
 import javax.annotation.Nullable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /** Caching version of {@link RuleDescription.Provider}. */
 public class CachingRuleDescription implements RuleDescription.Provider {
-  public static final RuleDescription.Provider INSTANCE = new CachingRuleDescription();
+  private final ConcurrentHashMap<Rule, RuleDescription> ruleDescriptionCache = new ConcurrentHashMap<>();
 
-  private static final LoadingCache<Rule, RuleDescription> RULE_DESCRIPTION_CACHE =
-      CacheBuilder.newBuilder()
-          .weakKeys()
-          .build(new CacheLoader<Rule, RuleDescription>() {
-            @Override
-            public RuleDescription load(Rule key) throws Exception {
-              return provideRuleDescription(key);
-            }
-          });
+  private final Function<Rule, RuleDescription> computeRuleDescriptionFunction;
 
-  private static RuleDescription provideRuleDescription(Rule rule) {
-    return new DefaultRuleDescription(rule);
+  public CachingRuleDescription(
+      Function<Rule, RuleDescription> computeRuleDescriptionFunction) {
+    this.computeRuleDescriptionFunction = checkNotNull(computeRuleDescriptionFunction);
   }
+
 
   @Nullable
   @Override
   public RuleDescription provide(Rule rule) {
-    return RULE_DESCRIPTION_CACHE.getUnchecked(rule);
+    ruleDescriptionCache.computeIfAbsent(rule, computeRuleDescriptionFunction);
+    return ruleDescriptionCache.get(rule);
   }
 }

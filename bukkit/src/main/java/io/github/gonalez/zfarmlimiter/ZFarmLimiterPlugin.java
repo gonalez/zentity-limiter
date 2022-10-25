@@ -18,11 +18,7 @@ package io.github.gonalez.zfarmlimiter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import io.github.gonalez.zfarmlimiter.entity.BasicEntityRuleHelper;
-import io.github.gonalez.zfarmlimiter.entity.CachingRuleDescription;
-import io.github.gonalez.zfarmlimiter.entity.EntityChecker;
-import io.github.gonalez.zfarmlimiter.entity.EntityHandlingEntityChecker;
-import io.github.gonalez.zfarmlimiter.entity.RecursivelyEntityExtractor;
+import io.github.gonalez.zfarmlimiter.entity.*;
 import io.github.gonalez.zfarmlimiter.listener.ZFarmLimiterListener;
 import io.github.gonalez.zfarmlimiter.rule.FileWritingRuleSerializer;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
@@ -38,6 +34,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.function.Function;
 import java.util.logging.Level;
 
 /** The main class of the ZFarm Limiter plugin. */
@@ -59,7 +56,7 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
         excludedEntityTypesBuilder.add(entityType);
       } catch (IllegalArgumentException exception) {
         getLogger().log(Level.WARNING,
-            "excludedEntityTypes no entity type found with name %s, skipping", excludedEntityName);
+            "excludedEntityTypes: no entity type was found with name %s, skipping", excludedEntityName);
       }
     }
 
@@ -81,8 +78,10 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
       variablesBuilder.setRuleCollection(ruleCollection);
       ruleSerializer.init();
 
+      EntityExtractorFilterFactory filterFactory = new MapEntityExtractorFilterFactory(EntityExtractorFilters.FILTERS);
+
       EntityChecker entityChecker = new EntityHandlingEntityChecker(
-          CachingRuleDescription.INSTANCE,
+          new CachingRuleDescription(rule -> new DefaultRuleDescription(filterFactory, rule)),
           RecursivelyEntityExtractor.INSTANCE,
           ImmutableList.of(Entity::remove));
       variablesBuilder.setEntityChecker(entityChecker);

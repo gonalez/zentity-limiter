@@ -15,51 +15,39 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import io.github.gonalez.zfarmlimiter.entity.filter.EntityIsNamedExtractorFilter;
+import io.github.gonalez.zfarmlimiter.entity.filter.EntityIsTamedExtractorFilter;
 import io.github.gonalez.zfarmlimiter.entity.filter.EntityTypeExtractorFilter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
+import java.util.Map;
+
 /** Helper class for {@link EntityExtractor.Filter}s. */
 public final class EntityExtractorFilters {
-  /** @return {@code true} if all of the given filters are allowed for the given entity. */
-  public static boolean allowed(
-      ImmutableList<EntityExtractor.Filter> filters, Entity entity) {
-    for (EntityExtractor.Filter filter : filters) {
-      if (!filter.allowed(entity))
-        return false;
+  public static final ImmutableSet<Class<? extends EntityExtractor.Filter<?>>> FILTERS =
+      ImmutableSet.of(
+          EntityTypeExtractorFilter.class,
+          EntityIsTamedExtractorFilter.class,
+          EntityIsNamedExtractorFilter.class);
+
+  public static boolean allowed(RuleDescription ruleDescription, Entity entity) {
+    for (Map.Entry<EntityExtractor.Filter<?>, Boolean> entry :
+        ruleDescription.getFilters().entrySet()) {
+      EntityExtractor.Filter filter = entry.getKey();
+      if (filter.filterType().isAssignableFrom(entity.getClass())) {
+        if (!filter.allowed(entity) && entry.getValue()) {
+          return false;
+        }
+      }
     }
     return true;
   }
 
   /** A new filter that compares if the entity type is compatible with another. */
-  public static EntityExtractor.Filter isEntityType(EntityType entityType) {
+  public static EntityExtractor.Filter<Entity> isEntityType(EntityType entityType) {
     return new EntityTypeExtractorFilter(entityType);
-  }
-
-  /** A new filter that compares if any of the given filters is allowed for an entity. */
-  public static EntityExtractor.Filter anyOf(ImmutableList<EntityExtractor.Filter> filters) {
-    return new AnyOfEntityExtractorFilter(filters);
-  }
-
-  private static final class AnyOfEntityExtractorFilter implements EntityExtractor.Filter {
-    private final ImmutableList<EntityExtractor.Filter> filters;
-
-    public AnyOfEntityExtractorFilter(ImmutableList<EntityExtractor.Filter> filters) {
-      this.filters = checkNotNull(filters);
-    }
-
-    @Override
-    public boolean allowed(Entity entity) {
-      for (EntityExtractor.Filter filter : filters) {
-        if (filter.allowed(entity)) {
-          return true;
-        }
-      }
-      return false;
-    }
   }
 
   private EntityExtractorFilters() {}

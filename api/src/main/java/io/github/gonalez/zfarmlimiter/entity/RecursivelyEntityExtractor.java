@@ -38,29 +38,29 @@ public class RecursivelyEntityExtractor implements EntityExtractor {
 
   @Override
   public ImmutableSet<Entity> extractEntitiesInLocation(
-      Location baseLocation, double radius, ImmutableList<Filter> filters) {
+      Location baseLocation, double radius, RuleDescription ruleDescription) {
     World world = checkNotNull(
         baseLocation.getWorld(),
         "location world must not be bull");
     Set<Entity> entityBuilder = new HashSet<>();
-    return extractEntitiesRecursively(world, baseLocation, radius, entityBuilder, filters);
+    return extractEntitiesRecursively(world, baseLocation, radius, entityBuilder, ruleDescription);
   }
 
   private static ImmutableSet<Entity> extractEntitiesRecursively(
       World world, Location location,
       double radius, Set<Entity> entities,
-      ImmutableList<Filter> filters) {
+      RuleDescription ruleDescription) {
     for (Entity entity : world.getNearbyEntities(location, radius, radius, radius)) {
       if (entities.contains(entity)) {
         continue;
       }
       // Checks if the entity passes all the necessary filters
-      boolean entityIsAllowed = EntityExtractorFilters.allowed(filters, entity);
+      boolean entityIsAllowed = EntityExtractorFilters.allowed(ruleDescription, entity);
       if (!entityIsAllowed) {
         continue;
       }
       entities.add(entity);
-      entities.addAll(extractEntitiesRecursively(world, location, radius, entities, filters));
+      entities.addAll(extractEntitiesRecursively(world, location, radius, entities, ruleDescription));
     }
     return ImmutableSet.copyOf(entities);
   }

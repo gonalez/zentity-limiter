@@ -15,32 +15,28 @@
  */
 package io.github.gonalez.zfarmlimiter.entity.filter;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import io.github.gonalez.zfarmlimiter.entity.EntityExtractor;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Tameable;
 
-/** A {@link EntityExtractor.Filter} which compares whether the entity type is compatible with another. */
-public class EntityTypeExtractorFilter implements EntityExtractor.Filter<Entity> {
-  private final EntityType entityType;
+public class EntityIsTamedExtractorFilter implements EntityExtractor.Filter<Tameable> {
+  private final boolean tamed;
 
-  public EntityTypeExtractorFilter(EntityType entityType) {
-    this.entityType = checkNotNull(entityType);
+  public EntityIsTamedExtractorFilter(Boolean tamed) {
+    this.tamed = tamed;
   }
 
   @Override
-  public Class<Entity> filterType() {
-    return Entity.class;
+  public Class<Tameable> filterType() {
+    return Tameable.class;
   }
 
   @Override
   public String getName() {
-    return "entity_type";
+    return "tamed";
   }
 
   @Override
-  public boolean allowed(Entity entity) {
-    return entity.getType() == entityType;
+  public boolean allowed(Tameable entity) {
+    return tamed == entity.isTamed();
   }
 }
