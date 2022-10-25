@@ -24,12 +24,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /** Caching version of {@link RuleDescription.Provider}. */
-public class CachingRuleDescription implements RuleDescription.Provider {
+public class CachingRuleDescriptionProvider implements RuleDescription.Provider {
   private final ConcurrentHashMap<Rule, RuleDescription> ruleDescriptionCache = new ConcurrentHashMap<>();
 
   private final Function<Rule, RuleDescription> computeRuleDescriptionFunction;
 
-  public CachingRuleDescription(
+  public CachingRuleDescriptionProvider(
       Function<Rule, RuleDescription> computeRuleDescriptionFunction) {
     this.computeRuleDescriptionFunction = checkNotNull(computeRuleDescriptionFunction);
   }

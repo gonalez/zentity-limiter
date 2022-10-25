@@ -22,10 +22,28 @@ import javax.annotation.Nullable;
 
 /** Contains more information about an {@link io.github.gonalez.zfarmlimiter.rule.Rule}. */
 public interface RuleDescription {
+  /** Provides thar provides {@link RuleDescription}s for a given rule. */
   interface Provider {
     @Nullable
     RuleDescription provide(Rule rule);
   }
 
+  /** The rule for which this description is intended for. */
+  Rule getRule();
+
+  /** @return a map of all filters that this rule description has. */
   ImmutableMap<EntityExtractor.Filter<?>, Boolean> getFilters();
+
+  /** Merges {@code this} rule description with {@code ruleDescription}. */
+  void mergeWith(RuleDescription ruleDescription);
+
+  /** @return {@code true} if this rule description supports cloning. */
+  default boolean supportsClone() {
+    return false;
+  }
+
+  /** Clones {@code this} instance, by default this method throws an {@link UnsupportedOperationException}. */
+  default RuleDescription createClone() {
+    throw new UnsupportedOperationException("not implemented");
+  }
 }

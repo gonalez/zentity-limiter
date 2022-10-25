@@ -15,12 +15,13 @@
  */
 package io.github.gonalez.zfarmlimiter.rule;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 /** A set of {@link Rule}s. */
 public interface RuleCollection {
+  /** @return all rules that this collection has. */
   ImmutableSet<Rule> getRules();
 
+  /** Invalidates any caches present in this collection. */
   void invalidateCaches();
 }

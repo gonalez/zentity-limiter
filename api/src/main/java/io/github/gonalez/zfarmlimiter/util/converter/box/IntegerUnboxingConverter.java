@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.github.gonalez.zfarmlimiter.util.converter.box;
 
 import io.github.gonalez.zfarmlimiter.util.converter.ObjectConverter;
 
+/** Converter for unboxing Integer into to its corresponding primitive type. */
 public class IntegerUnboxingConverter implements ObjectConverter<Integer, Integer> {
+
   @Override
   public Class<Integer> requiredType() {
     return Integer.class;

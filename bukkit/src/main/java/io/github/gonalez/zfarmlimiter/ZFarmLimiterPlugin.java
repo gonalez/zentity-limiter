@@ -34,7 +34,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.function.Function;
 import java.util.logging.Level;
 
 /** The main class of the ZFarm Limiter plugin. */
@@ -70,8 +69,7 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
               getDataFolder().toPath().resolve("rules"),
               ImmutableMap.of(
                   "myRule",
-                  Rule.newBuilder()
-                      .build()), // we already cover the defaults in Rule#newBuilder
+                  Rule.newBuilder().build()), // we already cover the defaults in Rule#newBuilder
               true);
 
       RuleCollection ruleCollection = new RuleSerializerListeningRuleCollection(ruleSerializer);
@@ -80,8 +78,12 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
 
       EntityExtractorFilterFactory filterFactory = new MapEntityExtractorFilterFactory(EntityExtractorFilters.FILTERS);
 
+      RuleDescription.Provider ruleDescriptionProvider =
+          new CachingRuleDescriptionProvider(rule -> new DefaultRuleDescription(filterFactory, rule));
+      variablesBuilder.setRuleDescriptionProvider(ruleDescriptionProvider);
+
       EntityChecker entityChecker = new EntityHandlingEntityChecker(
-          new CachingRuleDescription(rule -> new DefaultRuleDescription(filterFactory, rule)),
+          ruleDescriptionProvider,
           RecursivelyEntityExtractor.INSTANCE,
           ImmutableList.of(Entity::remove));
       variablesBuilder.setEntityChecker(entityChecker);

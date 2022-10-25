@@ -1,2 +1,3 @@
+# What kind of entity types should be excluded from the entity checker
 excludedEntityTypes:
   - 'PLAYER'

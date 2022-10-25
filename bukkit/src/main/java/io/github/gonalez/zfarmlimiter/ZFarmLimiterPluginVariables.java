@@ -15,59 +15,34 @@
  */
 package io.github.gonalez.zfarmlimiter;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.auto.value.AutoValue;
 import io.github.gonalez.zfarmlimiter.entity.EntityChecker;
+import io.github.gonalez.zfarmlimiter.entity.RuleDescription;
 import io.github.gonalez.zfarmlimiter.rule.RuleCollection;
 
 /** Shared values for the {@link ZFarmLimiterPlugin} plugin. */
-public interface ZFarmLimiterPluginVariables {
-  static Builder newBuilder() {
-    return new Builder.DefaultZFarmLimiterPluginVariablesBuilder();
+@AutoValue
+public abstract class ZFarmLimiterPluginVariables {
+  /** Creates a new builder, to create {@link ZFarmLimiterPluginVariables} instances. */
+  public static Builder newBuilder() {
+    return new AutoValue_ZFarmLimiterPluginVariables.Builder();
   }
 
-  EntityChecker getEntityChecker();
+  public abstract EntityChecker getEntityChecker();
 
-  RuleCollection getRuleCollection();
+  public abstract RuleCollection getRuleCollection();
 
-  interface Builder {
-    Builder setEntityChecker(EntityChecker entityChecker);
-    Builder setRuleCollection(RuleCollection ruleCollection);
+  public abstract RuleDescription.Provider getRuleDescriptionProvider();
 
-    ZFarmLimiterPluginVariables build();
+  /** Builder for {@link ZFarmLimiterPluginVariables}. */
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder setEntityChecker(EntityChecker entityChecker);
 
-    final class DefaultZFarmLimiterPluginVariablesBuilder implements Builder {
-      private EntityChecker entityChecker;
-      private RuleCollection ruleCollection;
+    public abstract Builder setRuleCollection(RuleCollection ruleCollection);
 
-      @Override
-      public Builder setEntityChecker(EntityChecker entityChecker) {
-        this.entityChecker = entityChecker;
-        return this;
-      }
+    public abstract Builder setRuleDescriptionProvider(RuleDescription.Provider ruleDescriptionProvider);
 
-      @Override
-      public Builder setRuleCollection(RuleCollection ruleCollection) {
-        this.ruleCollection = ruleCollection;
-        return this;
-      }
-
-      @Override
-      public ZFarmLimiterPluginVariables build() {
-        checkNotNull(entityChecker);
-        checkNotNull(ruleCollection);
-        return new ZFarmLimiterPluginVariables() {
-          @Override
-          public EntityChecker getEntityChecker() {
-            return entityChecker;
-          }
-
-          @Override
-          public RuleCollection getRuleCollection() {
-            return ruleCollection;
-          }
-        };
-      }
-    }
+    public abstract ZFarmLimiterPluginVariables build();
   }
 }

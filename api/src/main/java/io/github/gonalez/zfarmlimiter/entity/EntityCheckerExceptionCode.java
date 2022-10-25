@@ -15,7 +15,10 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
+/** Exception code of {@link EntityCheckerException}. */
 public enum EntityCheckerExceptionCode {
+  // A rule was not found
   NO_RULE_FOUND,
+  // A rule description was not found
   NO_RULE_DESCRIPTION_FOUND,
 }
