@@ -47,8 +47,10 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
 
   @Override
   public void onEnable() {
-    saveDefaultConfig();
     FileConfiguration fileConfiguration = getConfig();
+
+    fileConfiguration.options().copyDefaults(true);
+    saveConfig();
 
     ImmutableSet.Builder<EntityType> excludedEntityTypesBuilder = ImmutableSet.builder();
     for (String excludedEntityName : fileConfiguration.getStringList("excludedEntityTypes")) {

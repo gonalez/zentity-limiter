@@ -11,4 +11,8 @@ dependencies {
 
 shadowJar {
     classifier = null
+
+    dependencies {
+        include(project(':api'))
+    }
 }
