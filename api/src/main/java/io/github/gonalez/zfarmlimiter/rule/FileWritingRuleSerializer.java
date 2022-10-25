@@ -18,6 +18,7 @@ package io.github.gonalez.zfarmlimiter.rule;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import io.github.gonalez.zfarmlimiter.registry.ObjectRegistry;
 import io.github.gonalez.zfarmlimiter.util.converter.ObjectConverter;
 
@@ -26,6 +27,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Map;
 
 /**
  * A {@link AbstractBuilderRuleSerializer} which adds support for writing and adding values to the
@@ -39,29 +41,61 @@ import java.nio.file.Path;
  * recursively, so we will search for rules on all the paths within this directory too.
  */
 public abstract class FileWritingRuleSerializer extends AbstractBuilderRuleSerializer {
-  static final String RULE_FILE_CONTEXT_VALUE_NAME = "file";
+  public static final String RULE_FILE_CONTEXT_VALUE_NAME = "file";
 
   protected final File path;
 
   protected ImmutableMap<Rule, RuleFileWritingInfo> rules;
 
+  private final ImmutableMap<String, Rule> predefinedRules;
+
+  private final boolean pathCreated;
+
   public FileWritingRuleSerializer(
       ObjectConverter.Registry objectConverterRegistry,
-      boolean checkForMissingFields, Path path) throws IOException {
+      boolean checkForMissingFields, Path path,
+      ImmutableMap<String, Rule> predefinedRules) throws IOException {
     super(objectConverterRegistry, checkForMissingFields);
     checkNotNull(path);
     File pathFile = (this.path = path.toFile());
-    if (!pathFile.exists() && !pathFile.mkdirs()) {
+    if ((this.pathCreated =! pathFile.exists()) && !pathFile.mkdirs()) {
       throw new IOException("Could not create directory: " + path);
     } else if(!pathFile.isDirectory()) {
       throw new IOException(path + " is not a directory");
     }
+    this.predefinedRules = checkNotNull(predefinedRules);
   }
 
   public void init() throws IOException {
     if (rules == null) {
-      this.rules = fetchRulesRecursively(path);
+      ImmutableMap.Builder<Rule,
+          RuleFileWritingInfo> builder = ImmutableMap.builder();
+      builder.putAll(fetchRulesRecursively(path));
+
+      // Only set up the pre-defined rules if the path has been just created
+      if (pathCreated) {
+        for (Map.Entry<String, Rule> ruleEntry : predefinedRules.entrySet()) {
+          Rule rule = ruleEntry.getValue();
+
+          String fileName = ruleEntry.getKey() + "." + expectedFileExtension().replace(".", "");
+          File file = path.toPath().resolve(fileName).toFile();
+
+          RuleSerializerContext context = RuleSerializerContext.of(createBuilder(file).build());
+
+          serialize(rule, context); // serialize values
+          deserialize(context, null); // write
+
+          builder.put(rule, new RuleFileWritingInfo(file, context));
+        }
+        this.rules = builder.build();
+      }
     }
+  }
+
+  protected abstract String expectedFileExtension();
+
+  protected ObjectRegistry.Builder createBuilder(File file) {
+    return ObjectRegistry.newBuilder().add(RULE_FILE_CONTEXT_VALUE_NAME, File.class, file);
   }
 
   /**
@@ -77,14 +111,11 @@ public abstract class FileWritingRuleSerializer extends AbstractBuilderRuleSeria
     }
     for (File file : files) {
         RuleSerializerContext context = read(file);
-        Rule rule = deserialize(context, null);
 
-        ObjectRegistry.Builder builder =
-            ObjectRegistry.newBuilder()
-                .add(RULE_FILE_CONTEXT_VALUE_NAME, File.class, file);
+        ObjectRegistry.Builder builder = createBuilder(file);
         context.merge(builder);
 
-        ruleFileBuilder.put(rule,
+        ruleFileBuilder.put(deserialize(context, null),
             new RuleFileWritingInfo(file,
                 RuleSerializerContext.of(builder.build())));
       ruleFileBuilder.putAll(fetchRulesRecursively(file));
@@ -93,7 +124,6 @@ public abstract class FileWritingRuleSerializer extends AbstractBuilderRuleSeria
   }
 
   protected abstract RuleSerializerContext read(File file);
-
 
   protected File getFile(Rule rule, RuleSerializerContext ctx) {
     return ctx.get(RULE_FILE_CONTEXT_VALUE_NAME, File.class);

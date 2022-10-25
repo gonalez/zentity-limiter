@@ -17,6 +17,7 @@ package io.github.gonalez.zfarmlimiter.rule;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableMap;
 import io.github.gonalez.zfarmlimiter.registry.ObjectRegistry;
 import io.github.gonalez.zfarmlimiter.util.converter.ObjectConverter;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -38,18 +39,26 @@ import java.util.Map;
  * of the rule, as explained before.
  */
 public class YamlConfigurationRuleSerializer extends FileWritingRuleSerializer {
+  private static final String YAML_EXTENSION = ".yml";
+
   private final boolean saveConfig;
 
   public YamlConfigurationRuleSerializer(
-      ObjectConverter.Registry objectConverterRegistry,  boolean checkForMissingFields,
-      Path path, boolean saveConfig) throws IOException {
-    super(objectConverterRegistry, checkForMissingFields, path);
+      ObjectConverter.Registry objectConverterRegistry, boolean checkForMissingFields,
+      Path path, ImmutableMap<String, Rule> predefinedRules,
+      boolean saveConfig) throws IOException {
+    super(objectConverterRegistry, checkForMissingFields, path, predefinedRules);
     this.saveConfig = saveConfig;
   }
 
   @Override
   protected Class<? extends Rule> ruleType() {
     return Rule.class;
+  }
+
+  @Override
+  protected String expectedFileExtension() {
+    return YAML_EXTENSION;
   }
 
   @Override

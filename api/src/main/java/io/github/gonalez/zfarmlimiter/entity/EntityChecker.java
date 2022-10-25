@@ -15,19 +15,35 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
+import io.github.gonalez.zfarmlimiter.rule.Rule;
 import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;
 
+/** {@inheritDoc}. */
 public interface EntityChecker {
+  /** The result of {@link #check(Entity, Rule)}. */
   enum ResultType {
-    SUCCESS,
-    FAIL,
+    // Entity check was successful
+    SUCCEED,
+    // Some error or failure
+    FAILED,
+    // The number of entities found is less than the limit set by the rule
+    TOO_FEW_ENTITIES,
   }
 
-  void check(Entity entity) throws EntityCheckerException;
+  /**
+   * Checks the given entity for the given rule, looks for entities near the radius set by the rule and checks
+   * if there are more than the limit set by the rule, and handles accordingly.
+   */
+  ResultType check(Entity entity, Rule rule) throws EntityCheckerException;
 
+  /**
+   * Initializes this checker with the given plugin, it may not be necessary to call this method,
+   * but it is possible to have extra functionality if it is called.
+   */
   default void init(Plugin plugin) {}
 
+  /** @return {@code true} if this checker has been {@link #init(Plugin) initialized}. */
   default boolean isInitialized() {
     return false;
   }

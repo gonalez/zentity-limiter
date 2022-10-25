@@ -15,27 +15,34 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableList;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
 import org.bukkit.entity.Entity;
 
+/**
+ * Invokes the {@code handlers} for each of the
+ * {@link #analyzeExceededEntities(Rule, Entity, ImmutableList) analyzed entities.}
+ */
 public class EntityHandlingEntityChecker extends AbstractEntityChecker {
   private final ImmutableList<EntityHandler> handlers;
 
   public EntityHandlingEntityChecker(
-      EntityRuleResolver entityRuleResolver, EntityExtractor entityExtractor,
+      RuleDescription.Provider ruleDescriptionProvider, EntityExtractor entityExtractor,
       ImmutableList<EntityHandler> handlers) {
-    super(entityRuleResolver, entityExtractor);
-    this.handlers = handlers;
+    super(ruleDescriptionProvider, entityExtractor);
+    this.handlers = checkNotNull(handlers);
   }
 
   @Override
-  protected void analyzeExceededEntities(
+  protected ResultType analyzeExceededEntities(
       Rule rule, Entity checked, ImmutableList<Entity> entities) throws EntityCheckerException {
     for (Entity entity : entities) {
       for (EntityHandler entityHandler : handlers) {
         entityHandler.handle(entity);
       }
     }
+    return ResultType.SUCCEED;
   }
 }

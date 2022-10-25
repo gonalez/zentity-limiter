@@ -18,6 +18,7 @@ package io.github.gonalez.zfarmlimiter.entity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -48,11 +49,11 @@ public class EntityExtractorTest {
     when(world.getNearbyEntities(any(), anyDouble(), anyDouble(), anyDouble()))
         .thenReturn(entityBuilder.build());
 
-    EntityExtractor entityExtractor = new RecursivelyEntityExtractor(
-        ImmutableSet.of(
-            EntityExtractorFilters.isEntityType(EntityType.ZOMBIE)));
-
-    assertEquals(numEntities, entityExtractor.extractEntitiesInLocation(location, 5).size());
+    assertEquals(
+        numEntities,
+        RecursivelyEntityExtractor.INSTANCE.extractEntitiesInLocation(location, 5,
+            ImmutableList.of(
+                EntityExtractorFilters.isEntityType(EntityType.ZOMBIE))).size());
   }
 
   private static Entity mockEntity(EntityType entityType) {

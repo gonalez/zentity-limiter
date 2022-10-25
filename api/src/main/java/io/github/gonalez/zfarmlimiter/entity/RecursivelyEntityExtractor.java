@@ -17,6 +17,7 @@ package io.github.gonalez.zfarmlimiter.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -33,15 +34,11 @@ import java.util.Set;
  * given when constructing this object, otherwise, the entity will not be selected to be extracted.
  */
 public class RecursivelyEntityExtractor implements EntityExtractor {
-  private final ImmutableSet<Filter> filters;
-
-  public RecursivelyEntityExtractor(ImmutableSet<Filter> filters) {
-    this.filters = checkNotNull(filters);
-  }
+  public static final EntityExtractor INSTANCE = new RecursivelyEntityExtractor();
 
   @Override
   public ImmutableSet<Entity> extractEntitiesInLocation(
-      Location baseLocation, double radius) {
+      Location baseLocation, double radius, ImmutableList<Filter> filters) {
     World world = checkNotNull(
         baseLocation.getWorld(),
         "location world must not be bull");
@@ -52,7 +49,7 @@ public class RecursivelyEntityExtractor implements EntityExtractor {
   private static ImmutableSet<Entity> extractEntitiesRecursively(
       World world, Location location,
       double radius, Set<Entity> entities,
-      ImmutableSet<Filter> filters) {
+      ImmutableList<Filter> filters) {
     for (Entity entity : world.getNearbyEntities(location, radius, radius, radius)) {
       if (entities.contains(entity)) {
         continue;

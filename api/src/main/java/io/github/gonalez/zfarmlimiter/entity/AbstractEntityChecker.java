@@ -15,32 +15,40 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.reflect.TypeToken;
+import io.github.gonalez.zfarmlimiter.entity.event.EntityCheckEvent;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.Event;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 
-import javax.annotation.Nullable;
-
+/**
+ * Basic implementation for {@link EntityChecker}. This class also calls some events, for extra functionality,
+ * i.e {@link EntityCheckEvent}.
+ */
 public abstract class AbstractEntityChecker implements EntityChecker {
-  /** Resolves a rule for an entity. */
-  @FunctionalInterface
-  public interface EntityRuleResolver {
-    /** Retrieves the rule for the given entity or {@code null} if not found. */
-    @Nullable
-    Rule findRule(Entity entity);
-  }
-
-  private final EntityRuleResolver entityRuleResolver;
+  private final RuleDescription.Provider ruleDescriptionProvider;
   private final EntityExtractor entityExtractor;
 
+  protected PluginManager pluginManager;
+
   public AbstractEntityChecker(
-      EntityRuleResolver entityRuleResolver,
+      RuleDescription.Provider ruleDescriptionProvider,
       EntityExtractor entityExtractor) {
-    this.entityRuleResolver = entityRuleResolver;
-    this.entityExtractor = entityExtractor;
+    this.ruleDescriptionProvider = checkNotNull(ruleDescriptionProvider);
+    this.entityExtractor = checkNotNull(entityExtractor);
+  }
+
+  @Override
+  public void init(Plugin plugin) {
+    checkNotNull(plugin, "plugin cannot be null");
+    this.pluginManager = plugin.getServer().getPluginManager();
   }
 
   /**
@@ -48,24 +56,40 @@ public abstract class AbstractEntityChecker implements EntityChecker {
    *
    * @see Rule#maxAmount()
    */
-  protected abstract void analyzeExceededEntities(
+  protected abstract ResultType analyzeExceededEntities(
       Rule rule, Entity checked, ImmutableList<Entity> entities) throws EntityCheckerException;
 
+  /** Calls the given {@code event}, using the plugin manager. */
+  private <T extends Event> T callEvent(T event) {
+    pluginManager.callEvent(event);
+    return event;
+  }
+
   @Override
-  public void check(Entity entity) throws EntityCheckerException {
-    Rule rule = entityRuleResolver.findRule(entity);
-    if (rule == null) {
+  public ResultType check(Entity entity, Rule rule) throws EntityCheckerException {
+    Preconditions.checkState(rule != null,
+        "rule cannot be null");
+    RuleDescription ruleDescription = ruleDescriptionProvider.provide(rule);
+    if (ruleDescription == null) {
       throw EntityCheckerException.newBuilder()
-          .withExceptionCode(EntityCheckerExceptionCode.NO_RULE_FOUND)
+          .withMessage("No rule description was found for rule " + rule)
+          .withExceptionCode(EntityCheckerExceptionCode.NO_RULE_DESCRIPTION_FOUND)
           .build();
     }
     Location entityLocation = entity.getLocation();
     ImmutableSet<Entity> extractEntities =
-        entityExtractor.extractEntitiesInLocation(entityLocation, rule.radius());
+        entityExtractor.extractEntitiesInLocation(entityLocation, rule.radius(), ruleDescription.getFilters());
+
     if (extractEntities.size() > rule.maxAmount()) {
       ImmutableList<Entity> needsAnalyze =
           extractEntities.asList().subList(rule.maxAmount(), extractEntities.size());
-      analyzeExceededEntities(rule, entity, needsAnalyze);
+      if (pluginManager != null) {
+        EntityCheckEvent entityCheckEvent = this.callEvent(new EntityCheckEvent(rule));
+        rule = entityCheckEvent.getRule();
+      }
+      return analyzeExceededEntities(rule, entity, needsAnalyze);
     }
+
+    return ResultType.TOO_FEW_ENTITIES;
   }
 }

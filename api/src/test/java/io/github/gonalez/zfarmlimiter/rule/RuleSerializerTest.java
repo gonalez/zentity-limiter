@@ -17,6 +17,7 @@ package io.github.gonalez.zfarmlimiter.rule;
 
 import com.google.common.collect.ImmutableSet;
 import io.github.gonalez.zfarmlimiter.registry.ObjectRegistry;
+import io.github.gonalez.zfarmlimiter.util.converter.MoreObjectConverters;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +41,8 @@ public class RuleSerializerTest {
             .add("maxAmount", int.class, 0)
             .build();
 
-    RuleSerializer ruleSerializer = new AbstractBuilderRuleSerializer() {
+    RuleSerializer ruleSerializer = new AbstractBuilderRuleSerializer(
+        MoreObjectConverters.DEFAULT_REGISTRY, true) {
       @Override
       protected Class<? extends Rule> ruleType() {
         return Rule.class;
@@ -52,7 +54,7 @@ public class RuleSerializerTest {
       }
     };
 
-    Rule deserializedRule = ruleSerializer.deserialize(RuleSerializerContext.of(objectRegistry));
-    Assertions.assertEquals(expectedEntities, deserializedRule.entities());
+    Rule deserializedRule = ruleSerializer.deserialize(RuleSerializerContext.of(objectRegistry), null);
+    Assertions.assertEquals(expectedEntities, deserializedRule.allowedEntities());
   }
 }

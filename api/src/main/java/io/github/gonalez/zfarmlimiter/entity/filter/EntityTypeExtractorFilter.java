@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zfarmlimiter.entity.filters;
+package io.github.gonalez.zfarmlimiter.entity.filter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

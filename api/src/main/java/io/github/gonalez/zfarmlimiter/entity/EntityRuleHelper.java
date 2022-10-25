@@ -15,7 +15,9 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
-public enum EntityCheckerExceptionCode {
-  NO_RULE_FOUND,
-  NO_RULE_DESCRIPTION_FOUND,
+import io.github.gonalez.zfarmlimiter.rule.Rule;
+import org.bukkit.entity.Entity;
+
+public interface EntityRuleHelper {
+  boolean isCompatible(Rule rule, Entity entity);
 }

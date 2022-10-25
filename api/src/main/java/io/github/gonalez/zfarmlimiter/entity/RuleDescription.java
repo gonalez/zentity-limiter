@@ -15,7 +15,17 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
-public enum EntityCheckerExceptionCode {
-  NO_RULE_FOUND,
-  NO_RULE_DESCRIPTION_FOUND,
+import com.google.common.collect.ImmutableList;
+import io.github.gonalez.zfarmlimiter.rule.Rule;
+
+import javax.annotation.Nullable;
+
+/** Contains more information about an {@link io.github.gonalez.zfarmlimiter.rule.Rule}. */
+public interface RuleDescription {
+  interface Provider {
+    @Nullable
+    RuleDescription provide(Rule rule);
+  }
+
+  ImmutableList<EntityExtractor.Filter> getFilters();
 }

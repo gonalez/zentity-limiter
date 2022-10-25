@@ -21,10 +21,14 @@ import com.google.common.collect.ImmutableList;
 @AutoValue
 public abstract class Rule {
   public static Builder newBuilder() {
-    return new AutoValue_Rule.Builder();
+    return new AutoValue_Rule.Builder()
+        .setAllowedEntities(ImmutableList.of("VILLAGER"))
+        .setAllowedWorlds(ImmutableList.of())
+        .setRadius(3)
+        .setMaxAmount(5);
   }
 
-  public abstract ImmutableList<String> entities();
+  public abstract ImmutableList<String> allowedEntities();
   public abstract ImmutableList<String> allowedWorlds();
 
   public abstract double radius();
@@ -32,7 +36,7 @@ public abstract class Rule {
 
   @AutoValue.Builder
   public abstract static class Builder {
-    public abstract Builder setEntities(ImmutableList<String> entities);
+    public abstract Builder setAllowedEntities(ImmutableList<String> allowedEntities);
     public abstract Builder setAllowedWorlds(ImmutableList<String> allowedWorlds);
 
     public abstract Builder setRadius(double radius);

@@ -13,9 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.github.gonalez.zfarmlimiter.entity;
 
-public enum EntityCheckerExceptionCode {
-  NO_RULE_FOUND,
-  NO_RULE_DESCRIPTION_FOUND,
+import io.github.gonalez.zfarmlimiter.rule.Rule;
+import org.bukkit.entity.Entity;
+
+import javax.annotation.Nullable;
+
+/** Resolves a rule for an entity. */
+@FunctionalInterface
+public interface EntityRuleResolver {
+  /** Retrieves the rule for the given entity or {@code null} if not found. */
+  @Nullable
+  Rule findRule(Entity entity);
 }

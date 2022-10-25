@@ -15,8 +15,10 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
-import com.google.common.collect.ImmutableSet;
-import io.github.gonalez.zfarmlimiter.entity.filters.EntityTypeExtractorFilter;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.collect.ImmutableList;
+import io.github.gonalez.zfarmlimiter.entity.filter.EntityTypeExtractorFilter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
@@ -24,7 +26,7 @@ import org.bukkit.entity.EntityType;
 public final class EntityExtractorFilters {
   /** @return {@code true} if all of the given filters are allowed for the given entity. */
   public static boolean allowed(
-      ImmutableSet<EntityExtractor.Filter> filters, Entity entity) {
+      ImmutableList<EntityExtractor.Filter> filters, Entity entity) {
     for (EntityExtractor.Filter filter : filters) {
       if (!filter.allowed(entity))
         return false;
@@ -35,6 +37,29 @@ public final class EntityExtractorFilters {
   /** A new filter that compares if the entity type is compatible with another. */
   public static EntityExtractor.Filter isEntityType(EntityType entityType) {
     return new EntityTypeExtractorFilter(entityType);
+  }
+
+  /** A new filter that compares if any of the given filters is allowed for an entity. */
+  public static EntityExtractor.Filter anyOf(ImmutableList<EntityExtractor.Filter> filters) {
+    return new AnyOfEntityExtractorFilter(filters);
+  }
+
+  private static final class AnyOfEntityExtractorFilter implements EntityExtractor.Filter {
+    private final ImmutableList<EntityExtractor.Filter> filters;
+
+    public AnyOfEntityExtractorFilter(ImmutableList<EntityExtractor.Filter> filters) {
+      this.filters = checkNotNull(filters);
+    }
+
+    @Override
+    public boolean allowed(Entity entity) {
+      for (EntityExtractor.Filter filter : filters) {
+        if (filter.allowed(entity)) {
+          return true;
+        }
+      }
+      return false;
+    }
   }
 
   private EntityExtractorFilters() {}
