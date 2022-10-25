@@ -19,13 +19,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.github.gonalez.zfarmlimiter.entity.*;
-import io.github.gonalez.zfarmlimiter.listener.ZFarmLimiterListener;
 import io.github.gonalez.zfarmlimiter.rule.FileWritingRuleSerializer;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
 import io.github.gonalez.zfarmlimiter.rule.RuleCollection;
 import io.github.gonalez.zfarmlimiter.rule.RuleSerializerListeningRuleCollection;
 import io.github.gonalez.zfarmlimiter.rule.YamlConfigurationRuleSerializer;
 import io.github.gonalez.zfarmlimiter.util.converter.MoreObjectConverters;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -33,11 +34,19 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 /** The main class of the ZFarm Limiter plugin. */
 public class ZFarmLimiterPlugin extends JavaPlugin {
+  /** Actions to execute upon plugin disable. */
+  private final List<Runnable> disableActions = new ArrayList<>();
+
   @Nullable
   private ZFarmLimiterPluginVariables pluginVariables;
 
@@ -91,15 +100,52 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
 
       this.pluginVariables = variablesBuilder.build();
 
-      PluginManager pluginManager = getServer().getPluginManager();
-      pluginManager.registerEvents(
-          new ZFarmLimiterListener(
+      EntityCheckerRunEventHandler entityCheckingPluginEventHandler =
+          new EntityCheckerRunEventHandler(
               excludedEntityTypesBuilder.build(),
-              BasicEntityRuleHelper.INSTANCE,
+              entityChecker,
               ruleCollection,
-              entityChecker),
-          this);
-    } catch (IOException e) {
+              BasicEntityRuleHelper.INSTANCE);
+
+      PluginManager pluginManager = getServer().getPluginManager();
+      switch (EntityCheckingType.valueOf(
+          fileConfiguration.getString("checking.type").toUpperCase(Locale.UK))) {
+        case EVENT:
+          pluginManager.registerEvents(
+              new ZFarmLimiterListener(entityCheckingPluginEventHandler), this);
+          break;
+        case INTERVAL:
+          EntityCheckingTask entityCheckingTask =
+              new RunnableEntityCheckingTask(TimeUnit.SECONDS, fileConfiguration.getInt("checking.interval"));
+          disableActions.add(entityCheckingTask::shutdown);
+          for (Rule rule : ruleCollection.getRules()) {
+            entityCheckingTask.addCallback(new EntityCheckingTask.Callback() {
+              @Override
+              public void onAllEntitiesChecked() {
+                Set<World> allowedWorlds = new HashSet<>();
+                if (rule.allowedWorlds().isEmpty()) {
+                  allowedWorlds.addAll(getServer().getWorlds());
+                } else {
+                  for (String worldName : rule.allowedWorlds()) {
+                    World world = Bukkit.getWorld(worldName);
+                    if (world != null) {
+                      allowedWorlds.add(world);
+                    }
+                  }
+                }
+                for (World world : allowedWorlds) {
+                  for (Entity entity : world.getEntities()) {
+                    entityCheckingTask.addEntityForChecking(entity);
+                  }
+                }
+              }
+            });
+            entityCheckingTask.addHandler(entityCheckingPluginEventHandler);
+          }
+          entityCheckingTask.start();
+          break;
+      }
+    } catch (Exception e) {
       throw new RuntimeException("Cannot initialize plugin", e);
     }
   }
@@ -107,5 +153,12 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
   @Nullable
   public ZFarmLimiterPluginVariables getPluginVariables() {
     return pluginVariables;
+  }
+
+  @Override
+  public void onDisable() {
+    for (Runnable disableActions : this.disableActions) {
+      disableActions.run();
+    }
   }
 }

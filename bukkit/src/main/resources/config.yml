@@ -1,3 +1,12 @@
+# Entity checking options
+checking:
+  # Available types:
+  #   EVENT: Checks when a new entity spawns (CreatureSpawnEvent)
+  #   INTERVAL: Checks for all entities of the rule worlds every the interval
+  type: EVENT
+  # How long we should wait for next check (Only works if checking.type is EVENT)
+  interval: 600 # In seconds
+
 # What kind of entity types should be excluded from the entity checker
 excludedEntityTypes:
   - 'PLAYER'

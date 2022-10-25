@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zfarmlimiter.listener;
+package io.github.gonalez.zfarmlimiter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -23,20 +23,15 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import io.github.gonalez.zfarmlimiter.entity.EntityChecker;
 import io.github.gonalez.zfarmlimiter.entity.EntityCheckerException;
+import io.github.gonalez.zfarmlimiter.entity.EntityHandler;
 import io.github.gonalez.zfarmlimiter.entity.EntityRuleHelper;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
 import io.github.gonalez.zfarmlimiter.rule.RuleCollection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 
-/** Subscribes to all necessary events for basic functionality of the plugin. */
-public class ZFarmLimiterListener implements Listener {
-  private final EntityRuleHelper entityRuleHelper;
-  private final RuleCollection ruleCollection;
-
+// <internal>
+class EntityCheckerRunEventHandler implements EntityHandler {
   private final LoadingCache<Entity, ImmutableSet<Rule>> ENTITY_COMPATIBLE_RULES =
       CacheBuilder.newBuilder()
           .weakKeys()
@@ -56,20 +51,23 @@ public class ZFarmLimiterListener implements Listener {
   private final ImmutableSet<EntityType> excludedEntityTypes;
   private final EntityChecker entityChecker;
 
-  public ZFarmLimiterListener(
+  private final RuleCollection ruleCollection;
+  private final EntityRuleHelper entityRuleHelper;
+
+  public EntityCheckerRunEventHandler(
       ImmutableSet<EntityType> excludedEntityTypes,
-      EntityRuleHelper entityRuleHelper,
+      EntityChecker entityChecker,
       RuleCollection ruleCollection,
-      EntityChecker entityChecker) {
+      EntityRuleHelper entityRuleHelper) {
     this.excludedEntityTypes = checkNotNull(excludedEntityTypes);
-    this.entityRuleHelper = checkNotNull(entityRuleHelper);
-    this.ruleCollection = checkNotNull(ruleCollection);
     this.entityChecker = checkNotNull(entityChecker);
+    this.ruleCollection = checkNotNull(ruleCollection);
+    this.entityRuleHelper = checkNotNull(entityRuleHelper);
   }
 
-  @EventHandler
-  public void onCreatureSpawn(CreatureSpawnEvent creatureSpawnEvent) {
-    final Entity entity = creatureSpawnEvent.getEntity();
+
+  @Override
+  public void handle(Entity entity) {
     boolean isExcluded = excludedEntityTypes.contains(entity.getType());
     if (isExcluded) {
       return;
@@ -77,7 +75,7 @@ public class ZFarmLimiterListener implements Listener {
     ImmutableSet<Rule> compatibleEntityRules = ENTITY_COMPATIBLE_RULES.getUnchecked(entity);
     for (Rule rule : compatibleEntityRules) {
       try {
-        EntityChecker.ResultType resultType = entityChecker.check(entity, rule);
+        entityChecker.check(entity, rule);
       } catch (EntityCheckerException ignored) {
         // ...
       }
