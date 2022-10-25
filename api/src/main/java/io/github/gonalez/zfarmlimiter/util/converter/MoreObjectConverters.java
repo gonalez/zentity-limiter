@@ -15,8 +15,9 @@
  */
 package io.github.gonalez.zfarmlimiter.util.converter;
 
-
+/** Helper class to ease the use of {@link ObjectConverter}s. */
 public final class MoreObjectConverters {
+  /** A {@link ObjectConverter.Registry} which adds converters for the immutable collections on Guava */
   public static final ObjectConverter.Registry DEFAULT_REGISTRY =
       ObjectConverter.Registry.newBuilder()
           .addConverter(new ImmutableListConverter<>())
