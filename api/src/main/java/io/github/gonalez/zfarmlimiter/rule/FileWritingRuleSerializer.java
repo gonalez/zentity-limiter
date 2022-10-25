@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.gonalez.zfarmlimiter.registry.ObjectRegistry;
+import io.github.gonalez.zfarmlimiter.util.converter.ObjectConverter;
 
 import javax.annotation.Nullable;
 
@@ -26,6 +27,17 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * A {@link AbstractBuilderRuleSerializer} which adds support for writing and adding values to the
+ * context when serializing and deserializing rules.
+ *
+ * <p>{@code objectConverterRegistry} contains the necessary converters when a value on the context mismatches
+ * with the necessary one, for example if we need ImmutableList, and we have List, then we can convert this
+ * and continue with the deserialization safely.
+ *
+ * <p>{@code path} Is the path where the rules will be loaded/deserialized from, note that this will be done
+ * recursively, so we will search for rules on all the paths within this directory too.
+ */
 public abstract class FileWritingRuleSerializer extends AbstractBuilderRuleSerializer {
   static final String RULE_FILE_CONTEXT_VALUE_NAME = "file";
 
@@ -33,8 +45,10 @@ public abstract class FileWritingRuleSerializer extends AbstractBuilderRuleSeria
 
   protected ImmutableMap<Rule, RuleFileWritingInfo> rules;
 
-  public FileWritingRuleSerializer(boolean checkForMissingFields, Path path) throws IOException {
-    super(checkForMissingFields);
+  public FileWritingRuleSerializer(
+      ObjectConverter.Registry objectConverterRegistry,
+      boolean checkForMissingFields, Path path) throws IOException {
+    super(objectConverterRegistry, checkForMissingFields);
     checkNotNull(path);
     File pathFile = (this.path = path.toFile());
     if (!pathFile.exists() && !pathFile.mkdirs()) {
@@ -44,20 +58,24 @@ public abstract class FileWritingRuleSerializer extends AbstractBuilderRuleSeria
     }
   }
 
-  public void init() {
+  public void init() throws IOException {
     if (rules == null) {
       this.rules = fetchRulesRecursively(path);
     }
   }
 
-  private ImmutableMap<Rule, RuleFileWritingInfo> fetchRulesRecursively(File dir) {
+  /**
+   * Loads all the rules in the directory recursively,
+   * throws an {@code IOException} if cannot, load a rule.
+   */
+  private ImmutableMap<Rule, RuleFileWritingInfo> fetchRulesRecursively(
+      File dir) throws IOException {
     File[] files = dir.listFiles();
     ImmutableMap.Builder<Rule, RuleFileWritingInfo> ruleFileBuilder = ImmutableMap.builder();
     if (files == null) {
       return ruleFileBuilder.build();
     }
     for (File file : files) {
-      try {
         RuleSerializerContext context = read(file);
         Rule rule = deserialize(context, null);
 
@@ -69,9 +87,6 @@ public abstract class FileWritingRuleSerializer extends AbstractBuilderRuleSeria
         ruleFileBuilder.put(rule,
             new RuleFileWritingInfo(file,
                 RuleSerializerContext.of(builder.build())));
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
       ruleFileBuilder.putAll(fetchRulesRecursively(file));
     }
     return ruleFileBuilder.build();
@@ -100,6 +115,7 @@ public abstract class FileWritingRuleSerializer extends AbstractBuilderRuleSeria
     return findRule;
   }
 
+  /** Information about a rule for writing. */
   private static class RuleFileWritingInfo {
     final File file;
     final RuleSerializerContext context;

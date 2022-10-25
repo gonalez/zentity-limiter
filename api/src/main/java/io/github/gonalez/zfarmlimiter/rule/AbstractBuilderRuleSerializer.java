@@ -15,10 +15,12 @@
  */
 package io.github.gonalez.zfarmlimiter.rule;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import io.github.gonalez.zfarmlimiter.util.converter.ObjectConverter;
 import io.github.gonalez.zfarmlimiter.util.Pair;
 
 import javax.annotation.Nullable;
@@ -36,6 +38,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Base class for {@link RuleSerializer} which creates rules from its builder, to use this class it is necessary
+ * have a public, static method called {@code newBuilder} in the {@code ruleType} class, the builder must have
+ * the same methods as the rule, so it is possible to build the rule thoroughly.
+ * </p>
+ * <b>NOTE: </b>This class is somewhat expensive to use since it uses reflection almost everywhere.
+ */
 public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
   // Defines which characters a rule builder method should start with
   static final String SET_BUILDER_METHOD_START = "set";
@@ -47,15 +56,18 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
 
   private final Pair</*builder=*/Method, /*rule=*/Method> builderRuleMethodPair;
 
+  private final ImmutableMap<String, Method> ruleMethods;
   private final ImmutableMap<String, Method> builderMethods;
-
-  private final ImmutableSet<Method> ruleMethods;
 
   private final CopyOnWriteArrayList<RuleSerializerListener> listeners = new CopyOnWriteArrayList<>();
 
+  private final ObjectConverter.Registry objectConverterRegistry;
   private final boolean checkForMissingFields;
 
-  public AbstractBuilderRuleSerializer(boolean checkForMissingFields) {
+  public AbstractBuilderRuleSerializer(
+      ObjectConverter.Registry objectConverterRegistry,
+      boolean checkForMissingFields) {
+    this.objectConverterRegistry = checkNotNull(objectConverterRegistry);
     this.checkForMissingFields = checkForMissingFields;
     Class<? extends Rule> ruleClass = ruleType();
 
@@ -81,11 +93,14 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
     ImmutableMap<String, Method> newBuilderMethods = findMethodsIgnoring(buildRuleMethod.getDeclaringClass());
     ImmutableMap<String, Method> ruleMethods = findMethodsIgnoring(ruleClass);
 
-    this.ruleMethods = ImmutableSet.copyOf(ruleMethods.values());
 
-    ImmutableMap.Builder<String, Method> builder = ImmutableMap.builder();
+    ImmutableMap.Builder<String, Method> ruleMethodBuilder = ImmutableMap.builder();
+    ImmutableMap.Builder<String, Method> ruleBuilderMethodBuilder = ImmutableMap.builder();
     for (Map.Entry<String, Method> entry : ruleMethods.entrySet()) {
-      String capitalizedMethodName = capitalize(entry.getKey());
+      String methodName = entry.getKey();
+
+      ruleMethodBuilder.put(methodName, entry.getValue());
+      String capitalizedMethodName = capitalize(methodName);
 
       Method maybeFindBuilderMethod = newBuilderMethods.get(SET_BUILDER_METHOD_START + capitalizedMethodName);
       if (maybeFindBuilderMethod == null) {
@@ -98,9 +113,10 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
       checkState(builderParameterType == entry.getValue().getReturnType(),
           "parameter %s must assignable with %s",
           builderParameterType, entry.getValue().getReturnType());
-      builder.put(entry.getKey(), maybeFindBuilderMethod);
+      ruleBuilderMethodBuilder.put(methodName, maybeFindBuilderMethod);
     }
-    this.builderMethods = builder.build();
+    this.builderMethods = ruleBuilderMethodBuilder.build();
+    this.ruleMethods = ruleMethodBuilder.build();
   }
 
   @Override
@@ -108,7 +124,7 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
     listeners.add(listener);
   }
 
-  protected ImmutableSet<Method> getRuleMethods() {
+  protected ImmutableMap<String, Method> getRuleMethods() {
     return ruleMethods;
   }
 
@@ -156,11 +172,11 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
 
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public Rule deserialize(RuleSerializerContext context, @Nullable Visitor visitor) throws IOException {
     try {
       Object newBuilder = builderRuleMethodPair.getKey().invoke(null);
-      ImmutableMap.Builder<String, Pair<Class<?>, Object>> readFields = ImmutableMap.builder();
       for (Map.Entry<String, Method> entry : builderMethods.entrySet()) {
         Class<?> needsType = entry.getValue().getParameterTypes()[0];
         Object maybeFind = context.get(entry.getKey(), needsType);
@@ -170,10 +186,18 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
           }
           continue;
         }
+        Class<?> valueClass = maybeFind.getClass();
+        if (!needsType.isAssignableFrom(valueClass)) {
+          ObjectConverter converter =
+              objectConverterRegistry.findConverter(valueClass, needsType);
+          if (converter != null) {
+            maybeFind = converter.convert(maybeFind);
+          }
+        }
         entry.getValue().invoke(newBuilder, maybeFind);
       }
       Rule rule = (Rule) builderRuleMethodPair.getValue().invoke(newBuilder);
-      for (Method method : ruleMethods) {
+      for (Method method : ruleMethods.values()) {
         Object invoke = method.invoke(rule);
         if (visitor != null) {
           visitor.visitValue(rule, method.getName(), invoke.getClass(), invoke);

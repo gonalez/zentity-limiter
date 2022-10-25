@@ -17,22 +17,33 @@ package io.github.gonalez.zfarmlimiter.rule;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.ImmutableList;
 import io.github.gonalez.zfarmlimiter.registry.ObjectRegistry;
+import io.github.gonalez.zfarmlimiter.util.converter.ObjectConverter;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
+import java.util.Map;
 
+/**
+ * A {@link YamlConfiguration} based rule serializer. The rule creation can fail if the configuration does not
+ * have the necessary values, but the user can add default methods to the builder to add new fields, example,
+ * if we add a new value to the rule,  "interval", we won't have this in the configuration, but we can call
+ * this method with a default value in the {@code newBuilder} method.
+ *
+ * <p>{@code saveConfig}, will save the rule into the config file, useful to update new possible values
+ * of the rule, as explained before.
+ */
 public class YamlConfigurationRuleSerializer extends FileWritingRuleSerializer {
   private final boolean saveConfig;
 
   public YamlConfigurationRuleSerializer(
-      boolean checkForMissingFields,
+      ObjectConverter.Registry objectConverterRegistry,  boolean checkForMissingFields,
       Path path, boolean saveConfig) throws IOException {
-    super(checkForMissingFields, path);
+    super(objectConverterRegistry, checkForMissingFields, path);
     this.saveConfig = saveConfig;
   }
 
@@ -45,16 +56,18 @@ public class YamlConfigurationRuleSerializer extends FileWritingRuleSerializer {
   protected RuleSerializerContext read(File file) {
     YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(file);
     ObjectRegistry.Builder objectBuilder = ObjectRegistry.newBuilder();
-    objectBuilder.add("entities", ImmutableList.class,
-        ImmutableList.copyOf(yamlConfiguration.getStringList("entities")));
-    objectBuilder.add("allowedWorlds", ImmutableList.class,
-        ImmutableList.copyOf(yamlConfiguration.getStringList("allowedWorlds")));
-    objectBuilder.add("radius", double.class,
-        yamlConfiguration.getDouble("radius"));
-    objectBuilder.add("maxAmount", int.class,
-        yamlConfiguration.getInt("maxAmount"));
-    return RuleSerializerContext.of(
-        objectBuilder.add("file", File.class, file).build());
+    for (Map.Entry<String, Method> target : getRuleMethods().entrySet()) {
+      String keyName = target.getKey();
+      if (yamlConfiguration.contains(keyName)) {
+        Object configKeyValue = yamlConfiguration.get(keyName);
+        objectBuilder.add(
+            keyName,
+            (Class) target.getValue().getReturnType(),
+            configKeyValue);
+      }
+    }
+    objectBuilder.add("file", File.class, file);
+    return RuleSerializerContext.of(objectBuilder.build());
   }
 
   @Override

@@ -19,6 +19,7 @@ import io.github.gonalez.zfarmlimiter.rule.FileWritingRuleSerializer;
 import io.github.gonalez.zfarmlimiter.rule.RuleCollection;
 import io.github.gonalez.zfarmlimiter.rule.RuleSerializerListeningRuleCollection;
 import io.github.gonalez.zfarmlimiter.rule.YamlConfigurationRuleSerializer;
+import io.github.gonalez.zfarmlimiter.util.converter.MoreObjectConverters;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
     try {
       FileWritingRuleSerializer ruleSerializer =
           new YamlConfigurationRuleSerializer(
+              MoreObjectConverters.DEFAULT_REGISTRY,
               false,
               getDataFolder().toPath().resolve("rules"),
               true);
