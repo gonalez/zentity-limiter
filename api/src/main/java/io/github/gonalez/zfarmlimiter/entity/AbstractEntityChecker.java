@@ -77,21 +77,20 @@ public abstract class AbstractEntityChecker implements EntityChecker {
           .build();
     }
 
-    Location entityLocation = entity.getLocation();
-    ImmutableSet<Entity> extractEntities =
-        entityExtractor.extractEntitiesInLocation(entityLocation, rule.radius(),
-            ruleDescription);
+    if (pluginManager != null) {
+      EntityCheckEvent entityCheckEvent = this.callEvent(new EntityCheckEvent(entity, rule, ruleDescription));
+      if (entityCheckEvent.isCancelled()) {
+        return ResultType.EVENT_CANCELLED;
+      }
+      rule = entityCheckEvent.getRule();
+      ruleDescription = entityCheckEvent.getRuleDescription();
+    }
 
+    ImmutableSet<Entity> extractEntities =
+        entityExtractor.extractEntitiesInLocation(entity.getLocation(), rule.radius(), ruleDescription);
     if (extractEntities.size() > rule.maxAmount()) {
       ImmutableList<Entity> needsAnalyze =
           extractEntities.asList().subList(rule.maxAmount(), extractEntities.size());
-      if (pluginManager != null) {
-        EntityCheckEvent entityCheckEvent = this.callEvent(new EntityCheckEvent(rule));
-        if (entityCheckEvent.isCancelled()) {
-          return ResultType.EVENT_CANCELLED;
-        }
-        rule = entityCheckEvent.getRule();
-      }
       return analyzeExceededEntities(rule, entity, needsAnalyze);
     }
 

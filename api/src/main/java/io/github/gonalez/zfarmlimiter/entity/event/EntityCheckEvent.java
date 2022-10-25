@@ -17,7 +17,9 @@ package io.github.gonalez.zfarmlimiter.entity.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import io.github.gonalez.zfarmlimiter.entity.RuleDescription;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -25,12 +27,24 @@ import org.bukkit.event.HandlerList;
 public class EntityCheckEvent extends Event implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
 
+  private final Entity entity;
+
   private Rule rule;
+  private RuleDescription ruleDescription;
 
   private boolean cancelled = false;
 
-  public EntityCheckEvent(Rule rule) {
+  public EntityCheckEvent(
+      Entity entity,
+      Rule rule,
+      RuleDescription ruleDescription) {
+    this.entity = checkNotNull(entity);
     this.rule = checkNotNull(rule);
+    this.ruleDescription = checkNotNull(ruleDescription);
+  }
+
+  public Entity getEntity() {
+    return entity;
   }
 
   public Rule getRule() {
@@ -39,6 +53,14 @@ public class EntityCheckEvent extends Event implements Cancellable {
 
   public void setRule(Rule rule) {
     this.rule = rule;
+  }
+
+  public RuleDescription getRuleDescription() {
+    return ruleDescription;
+  }
+
+  public void setRuleDescription(RuleDescription ruleDescription) {
+    this.ruleDescription = ruleDescription;
   }
 
   @Override

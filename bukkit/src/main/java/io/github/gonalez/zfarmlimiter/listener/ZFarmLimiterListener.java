@@ -79,6 +79,7 @@ public class ZFarmLimiterListener implements Listener {
       try {
         EntityChecker.ResultType resultType = entityChecker.check(entity, rule);
       } catch (EntityCheckerException ignored) {
+        // ...
       }
     }
   }
