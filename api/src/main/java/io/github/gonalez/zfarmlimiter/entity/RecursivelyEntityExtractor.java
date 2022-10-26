@@ -69,8 +69,10 @@ public class RecursivelyEntityExtractor implements EntityExtractor {
         continue;
       }
       entities.add(entity);
-      entities.addAll(extractEntitiesRecursively(
-          world, location, radius, entities, ruleDescription, filterExtractor));
+      if (ruleDescription.getRule().recursively()) {
+        entities.addAll(extractEntitiesRecursively(world, location, radius,
+            entities, ruleDescription, filterExtractor));
+      }
     }
     return ImmutableSet.copyOf(entities);
   }

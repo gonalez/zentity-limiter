@@ -27,7 +27,8 @@ public abstract class Rule {
         .setAllowedWorlds(ImmutableList.of())
         .setRadius(3)
         .setMaxAmount(5)
-        .setOptions(ImmutableMap.of("tamed", true));
+        .setOptions(ImmutableMap.of("tamed", true))
+        .setRecursively(true);
   }
 
   public abstract ImmutableList<String> allowedEntities();
@@ -38,6 +39,8 @@ public abstract class Rule {
 
   public abstract ImmutableMap<String, Object> options();
 
+  public abstract boolean recursively();
+
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setAllowedEntities(ImmutableList<String> allowedEntities);
@@ -47,6 +50,8 @@ public abstract class Rule {
     public abstract Builder setMaxAmount(int maxAmount);
 
     public abstract Builder setOptions(ImmutableMap<String, Object> options);
+
+    public abstract Builder setRecursively(boolean recursively);
 
     public abstract Rule build();
   }
