@@ -15,39 +15,31 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.github.gonalez.zfarmlimiter.entity.filter.EntityIsNamedExtractorFilter;
 import io.github.gonalez.zfarmlimiter.entity.filter.EntityIsTamedExtractorFilter;
 import io.github.gonalez.zfarmlimiter.entity.filter.EntityTypeExtractorFilter;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 
-import java.util.Map;
+import javax.annotation.Nullable;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-/** Helper class for {@link EntityExtractor.Filter}s. */
+/** Helper class for {@link EntityExtractorFilter}s. */
 public final class EntityExtractorFilters {
-  public static final ImmutableSet<Class<? extends EntityExtractor.Filter<?>>> FILTERS =
-      ImmutableSet.of(
-          EntityTypeExtractorFilter.class,
-          EntityIsTamedExtractorFilter.class,
-          EntityIsNamedExtractorFilter.class);
+  private static final ImmutableList<EntityExtractorFilter<?>> DEFAULT_FILTERS =
+      ImmutableList.of(
+          new EntityTypeExtractorFilter(),
+          new EntityIsTamedExtractorFilter(),
+          new EntityIsNamedExtractorFilter());
 
-  public static boolean allowed(RuleDescription ruleDescription, Entity entity) {
-    for (Map.Entry<EntityExtractor.Filter<?>, Boolean> entry :
-        ruleDescription.getFilters().entrySet()) {
-      EntityExtractor.Filter filter = entry.getKey();
-      if (filter.filterType().isAssignableFrom(entity.getClass())) {
-        if (!filter.allowed(entity) && entry.getValue()) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
+  private static final ImmutableMap<String, EntityExtractorFilter<?>> BY_NAME =
+      ImmutableMap.copyOf(DEFAULT_FILTERS.stream().collect(
+          Collectors.toMap(EntityExtractorFilter::getName, Function.identity())));
 
-  /** A new filter that compares if the entity type is compatible with another. */
-  public static EntityExtractor.Filter<Entity> isEntityType(EntityType entityType) {
-    return new EntityTypeExtractorFilter(entityType);
+  @Nullable
+  public static EntityExtractorFilter<?> findFilterForName(String filterName) {
+    return BY_NAME.get(filterName.toLowerCase());
   }
 
   private EntityExtractorFilters() {}

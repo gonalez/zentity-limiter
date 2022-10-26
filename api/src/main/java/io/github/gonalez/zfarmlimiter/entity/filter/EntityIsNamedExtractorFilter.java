@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.github.gonalez.zfarmlimiter.entity.filter;
 
-import io.github.gonalez.zfarmlimiter.entity.EntityExtractor;
+import io.github.gonalez.zfarmlimiter.entity.AbstractEntityExtractorFilter;
 import org.bukkit.entity.Entity;
 
-public class EntityIsNamedExtractorFilter implements EntityExtractor.Filter<Entity> {
-  private final boolean named;
-
-  public EntityIsNamedExtractorFilter(boolean named) {
-    this.named = named;
-  }
+public class EntityIsNamedExtractorFilter extends AbstractEntityExtractorFilter<Boolean, Entity> {
 
   @Override
   public Class<Entity> filterType() {
@@ -37,7 +31,13 @@ public class EntityIsNamedExtractorFilter implements EntityExtractor.Filter<Enti
   }
 
   @Override
-  public boolean allowed(Entity type) {
-    return !named || type.getCustomName() != null;
+  protected boolean doAllowed(Boolean value, Entity type) {
+    return !value || type.getCustomName() != null;
+
+  }
+
+  @Override
+  protected Class<Boolean> valueType() {
+    return boolean.class;
   }
 }

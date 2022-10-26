@@ -15,10 +15,12 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
-import javax.annotation.Nullable;
+import com.google.common.collect.ImmutableMap;
+import io.github.gonalez.zfarmlimiter.registry.ObjectRegistry;
+import org.bukkit.entity.Entity;
 
-/** Factory to create {@link EntityExtractor.Filter} instances. */
-public interface EntityExtractorFilterFactory {
-  @Nullable
-  EntityExtractor.Filter<?> createFilter(String name, Object value);
+/** Responsible for extracting the proper filters that can be executed for an entity from a {@link RuleDescription}. */
+public interface EntityExtractorFilterExtractor {
+  ImmutableMap<EntityExtractorFilter<?>, ObjectRegistry> extractFilters(
+      RuleDescription ruleDescription, Entity entity);
 }

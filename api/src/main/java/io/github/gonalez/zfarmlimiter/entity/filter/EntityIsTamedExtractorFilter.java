@@ -15,15 +15,10 @@
  */
 package io.github.gonalez.zfarmlimiter.entity.filter;
 
-import io.github.gonalez.zfarmlimiter.entity.EntityExtractor;
+import io.github.gonalez.zfarmlimiter.entity.AbstractEntityExtractorFilter;
 import org.bukkit.entity.Tameable;
 
-public class EntityIsTamedExtractorFilter implements EntityExtractor.Filter<Tameable> {
-  private final boolean tamed;
-
-  public EntityIsTamedExtractorFilter(Boolean tamed) {
-    this.tamed = tamed;
-  }
+public class EntityIsTamedExtractorFilter extends AbstractEntityExtractorFilter<Boolean, Tameable> {
 
   @Override
   public Class<Tameable> filterType() {
@@ -34,9 +29,14 @@ public class EntityIsTamedExtractorFilter implements EntityExtractor.Filter<Tame
   public String getName() {
     return "tamed";
   }
+  
+  @Override
+  protected boolean doAllowed(Boolean tamed, Tameable type) {
+    return tamed == type.isTamed();
+  }
 
   @Override
-  public boolean allowed(Tameable entity) {
-    return tamed == entity.isTamed();
+  protected Class<Boolean> valueType() {
+    return boolean.class;
   }
 }

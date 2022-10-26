@@ -32,5 +32,13 @@ public final class MoreObjectConverters {
           .addConverter(new IntegerUnboxingConverter())
           .build();
 
+  public static Class<?> convertClass(Class<?> clazz) {
+    ObjectConverter<?, ?> objectConverter = DEFAULT_REGISTRY.findConverter(clazz, clazz);
+    if (objectConverter != null) {
+      return objectConverter.convertedType();
+    }
+    return clazz;
+  }
+
   private MoreObjectConverters() {}
 }

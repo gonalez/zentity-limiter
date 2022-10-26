@@ -16,8 +16,11 @@
 package io.github.gonalez.zfarmlimiter.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.github.gonalez.zfarmlimiter.entity.EntityExtractorFilters.*;
+import static io.github.gonalez.zfarmlimiter.util.converter.MoreObjectConverters.convertClass;
 
 import com.google.common.collect.ImmutableMap;
+import io.github.gonalez.zfarmlimiter.registry.ObjectRegistry;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
 import org.bukkit.entity.EntityType;
 
@@ -29,25 +32,30 @@ import java.util.Map;
 public class DefaultRuleDescription implements RuleDescription {
   private final HashSet<RuleDescription> ruleDescriptions = new HashSet<>();
 
-  private final HashMap<EntityExtractor.Filter<?>, Boolean> filters = new HashMap<>();
+  private final HashMap<EntityExtractorFilter<?>, ObjectRegistry> filters = new HashMap<>();
 
-  private final EntityExtractorFilterFactory filterFactory;
   private final Rule rule;
 
-  public DefaultRuleDescription(
-      EntityExtractorFilterFactory filterFactory, Rule rule) {
-    this.filterFactory = checkNotNull(filterFactory);
+  public DefaultRuleDescription(Rule rule) {
     this.rule = checkNotNull(rule);
-    for (String allowedEntities : rule.allowedEntities()) {
-      filters.put(EntityExtractorFilters.isEntityType(EntityType.valueOf(allowedEntities)), true);
+    for (String allowedEntity : rule.allowedEntities()) {
+      registerFilter(findFilterForName("entity_type"), EntityType.valueOf(allowedEntity));
     }
     for (Map.Entry<String, Object> optionEntry : rule.options().entrySet()) {
-      EntityExtractor.Filter<?> maybeCreateFilter =
-          filterFactory.createFilter(optionEntry.getKey(), optionEntry.getValue());
+      EntityExtractorFilter<?> maybeCreateFilter =
+          findFilterForName(optionEntry.getKey());
       if (maybeCreateFilter != null) {
-        filters.put(maybeCreateFilter, true);
+        registerFilter(maybeCreateFilter, optionEntry.getValue());
       }
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  private void registerFilter(
+      EntityExtractorFilter<?> filter, Object value) {
+    ObjectRegistry objectRegistry =
+        ObjectRegistry.of(filter.getName(), (Class<? super Object>) convertClass(value.getClass()), value);
+    filters.put(filter, objectRegistry);
   }
 
   @Override
@@ -56,7 +64,7 @@ public class DefaultRuleDescription implements RuleDescription {
   }
 
   @Override
-  public ImmutableMap<EntityExtractor.Filter<?>, Boolean> getFilters() {
+  public ImmutableMap<EntityExtractorFilter<?>, ObjectRegistry> getFilters() {
     return ImmutableMap.copyOf(filters);
   }
 
@@ -74,7 +82,7 @@ public class DefaultRuleDescription implements RuleDescription {
 
   @Override
   public RuleDescription createClone() {
-    RuleDescription ruleDescription = new DefaultRuleDescription(filterFactory, rule);
+    RuleDescription ruleDescription = new DefaultRuleDescription(rule);
     for (RuleDescription merge : ruleDescriptions) {
       ruleDescription.mergeWith(merge);
     }

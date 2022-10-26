@@ -15,25 +15,12 @@
  */
 package io.github.gonalez.zfarmlimiter.entity;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 
 /** Responsible for extracting a set of entities at a location and radius. */
 public interface EntityExtractor {
-  /** Interface to restrict which entities can be extracted. */
-  interface Filter<T> {
-    Class<T> filterType();
-
-    /** @return the name of this filter. */
-    String getName();
-
-    /** @return {@code true} if the entity can be extracted. */
-    boolean allowed(T type);
-  }
-
   /** Extracts the entities found at the given location and radius. */
   ImmutableSet<Entity> extractEntitiesInLocation(
       Location location, double radius, RuleDescription ruleDescription);

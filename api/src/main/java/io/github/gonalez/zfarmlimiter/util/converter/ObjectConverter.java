@@ -17,6 +17,7 @@ package io.github.gonalez.zfarmlimiter.util.converter;
 
 import io.github.gonalez.zfarmlimiter.util.Pair;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,8 @@ public interface ObjectConverter<K, V> {
       return new Builder.DefaultObjectConverterBuilder();
     }
 
-    <K, V> ObjectConverter<K,V> findConverter(Class<K> keyType, Class<V> valueType);
+    @Nullable
+    <K, V> ObjectConverter<K , V> findConverter(Class<K> keyType, Class<V> valueType);
 
     /** Builder for {@link Registry}. */
     interface Builder {
@@ -51,6 +53,7 @@ public interface ObjectConverter<K, V> {
         public Registry build() {
           return new Registry() {
             @SuppressWarnings({"unchecked", "rawtypes"})
+            @Nullable
             @Override
             public <K, V> ObjectConverter<K, V> findConverter(Class<K> keyType, Class<V> valueType) {
               // TODO: a better way to cache this...

@@ -17,7 +17,6 @@ package io.github.gonalez.zfarmlimiter.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -34,7 +33,11 @@ import java.util.Set;
  * given when constructing this object, otherwise, the entity will not be selected to be extracted.
  */
 public class RecursivelyEntityExtractor implements EntityExtractor {
-  public static final EntityExtractor INSTANCE = new RecursivelyEntityExtractor();
+  private final EntityExtractorFilterExtractor filterExtractor;
+
+  public RecursivelyEntityExtractor(EntityExtractorFilterExtractor filterExtractor) {
+    this.filterExtractor = checkNotNull(filterExtractor);
+  }
 
   @Override
   public ImmutableSet<Entity> extractEntitiesInLocation(
@@ -43,24 +46,31 @@ public class RecursivelyEntityExtractor implements EntityExtractor {
         baseLocation.getWorld(),
         "location world must not be bull");
     Set<Entity> entityBuilder = new HashSet<>();
-    return extractEntitiesRecursively(world, baseLocation, radius, entityBuilder, ruleDescription);
+    return extractEntitiesRecursively(
+        world, baseLocation, radius,
+        entityBuilder, ruleDescription,
+        filterExtractor);
   }
 
   private static ImmutableSet<Entity> extractEntitiesRecursively(
       World world, Location location,
       double radius, Set<Entity> entities,
-      RuleDescription ruleDescription) {
+      RuleDescription ruleDescription, EntityExtractorFilterExtractor filterExtractor) {
     for (Entity entity : world.getNearbyEntities(location, radius, radius, radius)) {
       if (entities.contains(entity)) {
         continue;
       }
       // Checks if the entity passes all the necessary filters
-      boolean entityIsAllowed = EntityExtractorFilters.allowed(ruleDescription, entity);
+      boolean entityIsAllowed =
+          filterExtractor.extractFilters(ruleDescription, entity)
+              .entrySet().stream()
+              .allMatch(filter -> ((EntityExtractorFilter)filter.getKey()).allowed(filter.getValue(), entity));
       if (!entityIsAllowed) {
         continue;
       }
       entities.add(entity);
-      entities.addAll(extractEntitiesRecursively(world, location, radius, entities, ruleDescription));
+      entities.addAll(extractEntitiesRecursively(
+          world, location, radius, entities, ruleDescription, filterExtractor));
     }
     return ImmutableSet.copyOf(entities);
   }

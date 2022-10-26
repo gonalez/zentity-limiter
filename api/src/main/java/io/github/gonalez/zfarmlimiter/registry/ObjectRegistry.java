@@ -16,8 +16,6 @@
 package io.github.gonalez.zfarmlimiter.registry;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.SetMultimap;
@@ -29,6 +27,10 @@ import java.util.Map;
 public interface ObjectRegistry {
   static Builder newBuilder() {
     return new Builder.DefaultObjectRegistryBuilder();
+  }
+
+  static <T> ObjectRegistry of(String name, Class<T> clazz, T value) {
+    return newBuilder().add(name, clazz, value).build();
   }
 
   <T> T get(String key, Class<T> type);

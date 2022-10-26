@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.github.gonalez.zfarmlimiter.entity;
 
-import io.github.gonalez.zfarmlimiter.rule.Rule;
-import org.bukkit.entity.Entity;
+import io.github.gonalez.zfarmlimiter.registry.ObjectRegistry;
 
-import javax.annotation.Nullable;
+/** Interface to restrict which entities can be extracted. */
+public interface EntityExtractorFilter<T> {
+  /** @return the type of thing that this filter applies on. */
+  Class<T> filterType();
 
-/** Resolves a rule for an entity. */
-@FunctionalInterface
-public interface EntityRuleResolver {
-  /** Retrieves the rule for the given entity or {@code null} if not found. */
-  @Nullable
-  Rule findRule(Entity entity);
+  /** @return the name of this filter. */
+  String getName();
+
+  /** @return {@code true} if the entity can be extracted. */
+  boolean allowed(ObjectRegistry objectRegistry, T type);
 }

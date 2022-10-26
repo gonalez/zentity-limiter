@@ -85,15 +85,14 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
       variablesBuilder.setRuleCollection(ruleCollection);
       ruleSerializer.init();
 
-      EntityExtractorFilterFactory filterFactory = new MapEntityExtractorFilterFactory(EntityExtractorFilters.FILTERS);
-
       RuleDescription.Provider ruleDescriptionProvider =
-          new CachingRuleDescriptionProvider(rule -> new DefaultRuleDescription(filterFactory, rule));
+          new CachingRuleDescriptionProvider(DefaultRuleDescription::new);
       variablesBuilder.setRuleDescriptionProvider(ruleDescriptionProvider);
 
       EntityChecker entityChecker = new EntityHandlingEntityChecker(
           ruleDescriptionProvider,
-          RecursivelyEntityExtractor.INSTANCE,
+          new RecursivelyEntityExtractor(
+              new TypeEqualsEntityExtractorFilterExtractor(entity -> entity.getType().getEntityClass())),
           ImmutableList.of(Entity::remove));
       variablesBuilder.setEntityChecker(entityChecker);
       entityChecker.init(this);
@@ -134,9 +133,12 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
                   }
                 }
                 for (World world : allowedWorlds) {
-                  for (Entity entity : world.getEntities()) {
-                    entityCheckingTask.addEntityForChecking(entity);
-                  }
+                  getServer().getScheduler().runTask(ZFarmLimiterPlugin.this,
+                      () -> {
+                        for (Entity entity : world.getEntities()) {
+                          entityCheckingTask.addEntityForChecking(entity);
+                        }
+                      });
                 }
               }
             });

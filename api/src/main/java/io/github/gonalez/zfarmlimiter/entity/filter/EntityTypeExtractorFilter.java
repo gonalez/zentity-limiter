@@ -15,19 +15,13 @@
  */
 package io.github.gonalez.zfarmlimiter.entity.filter;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import io.github.gonalez.zfarmlimiter.entity.EntityExtractor;
+import io.github.gonalez.zfarmlimiter.entity.AbstractEntityExtractorFilter;
+import io.github.gonalez.zfarmlimiter.entity.EntityExtractorFilter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
-/** A {@link EntityExtractor.Filter} which compares whether the entity type is compatible with another. */
-public class EntityTypeExtractorFilter implements EntityExtractor.Filter<Entity> {
-  private final EntityType entityType;
-
-  public EntityTypeExtractorFilter(EntityType entityType) {
-    this.entityType = checkNotNull(entityType);
-  }
+/** A {@link EntityExtractorFilter} which compares whether the entity type is compatible with another. */
+public class EntityTypeExtractorFilter extends AbstractEntityExtractorFilter<EntityType, Entity> {
 
   @Override
   public Class<Entity> filterType() {
@@ -40,7 +34,12 @@ public class EntityTypeExtractorFilter implements EntityExtractor.Filter<Entity>
   }
 
   @Override
-  public boolean allowed(Entity entity) {
-    return entity.getType() == entityType;
+  protected boolean doAllowed(EntityType value, Entity type) {
+    return value == type.getType();
+  }
+
+  @Override
+  protected Class<EntityType> valueType() {
+    return EntityType.class;
   }
 }

@@ -19,7 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import io.github.gonalez.zfarmlimiter.entity.filter.EntityTypeExtractorFilter;
+import io.github.gonalez.zfarmlimiter.registry.ObjectRegistry;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -49,11 +52,17 @@ public class EntityExtractorTest {
     when(world.getNearbyEntities(any(), anyDouble(), anyDouble(), anyDouble()))
         .thenReturn(entityBuilder.build());
 
+    RuleDescription ruleDescription = mock(RuleDescription.class);
+    when(ruleDescription.getFilters()).thenReturn(
+        ImmutableMap.of(new EntityTypeExtractorFilter(),
+            ObjectRegistry.of("entity_type", EntityType.class, EntityType.ZOMBIE)));
+
     assertEquals(
         numEntities,
-        RecursivelyEntityExtractor.INSTANCE.extractEntitiesInLocation(location, 5,
-            ImmutableList.of(
-                EntityExtractorFilters.isEntityType(EntityType.ZOMBIE))).size());
+        new RecursivelyEntityExtractor(
+            new TypeEqualsEntityExtractorFilterExtractor(entity -> entity.getType().getEntityClass()))
+                .extractEntitiesInLocation(location, 5,
+                    ruleDescription).size());
   }
 
   private static Entity mockEntity(EntityType entityType) {

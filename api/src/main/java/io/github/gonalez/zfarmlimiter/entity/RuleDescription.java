@@ -16,6 +16,7 @@
 package io.github.gonalez.zfarmlimiter.entity;
 
 import com.google.common.collect.ImmutableMap;
+import io.github.gonalez.zfarmlimiter.registry.ObjectRegistry;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
 
 import javax.annotation.Nullable;
@@ -32,7 +33,7 @@ public interface RuleDescription {
   Rule getRule();
 
   /** @return a map of all filters that this rule description has. */
-  ImmutableMap<EntityExtractor.Filter<?>, Boolean> getFilters();
+  ImmutableMap<EntityExtractorFilter<?>, ObjectRegistry> getFilters();
 
   /** Merges {@code this} rule description with {@code ruleDescription}. */
   void mergeWith(RuleDescription ruleDescription);
