@@ -19,5 +19,6 @@ shadowJar {
         include(project(':api'))
         include(dependency('com.google.auto.value:.*'))
     }
+
     relocate 'com.google.auto', 'libs.com.google.auto'
 }

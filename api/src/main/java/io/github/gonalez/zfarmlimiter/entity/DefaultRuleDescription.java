@@ -39,7 +39,7 @@ public class DefaultRuleDescription implements RuleDescription {
     this.filterFactory = checkNotNull(filterFactory);
     this.rule = checkNotNull(rule);
     for (String allowedEntities : rule.allowedEntities()) {
-      filters.put(EntityExtractorFilters.isEntityType(EntityType.valueOf(allowedEntities)), false);
+      filters.put(EntityExtractorFilters.isEntityType(EntityType.valueOf(allowedEntities)), true);
     }
     for (Map.Entry<String, Object> optionEntry : rule.options().entrySet()) {
       EntityExtractor.Filter<?> maybeCreateFilter =
