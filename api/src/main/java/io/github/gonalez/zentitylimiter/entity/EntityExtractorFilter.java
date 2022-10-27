@@ -13,7 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.entity;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+import io.github.gonalez.zentitylimiter.registry.ObjectRegistry;
+
+/** Interface to restrict which entities can be extracted. */
+public interface EntityExtractorFilter<T> {
+  /** @return the type of thing that this filter applies on. */
+  Class<T> filterType();
+
+  /** @return the name of this filter. */
+  String getName();
+
+  /** @return {@code true} if the entity can be extracted. */
+  boolean allowed(ObjectRegistry objectRegistry, T type);
+}

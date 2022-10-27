@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.entity;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+/** Exception code of {@link EntityCheckerException}. */
+public enum EntityCheckerExceptionCode {
+  // A rule was not found
+  NO_RULE_FOUND,
+  // A rule description was not found
+  NO_RULE_DESCRIPTION_FOUND,
+}

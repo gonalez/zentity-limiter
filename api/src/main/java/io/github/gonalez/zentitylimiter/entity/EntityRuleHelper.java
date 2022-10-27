@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.entity;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+import io.github.gonalez.zentitylimiter.rule.Rule;
+import org.bukkit.entity.Entity;
+
+public interface EntityRuleHelper {
+  boolean isCompatible(Rule rule, Entity entity);
+}

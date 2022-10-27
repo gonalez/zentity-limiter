@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.rule;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+import com.google.common.collect.ImmutableSet;
+
+/** A set of {@link Rule}s. */
+public interface RuleCollection {
+  /** @return all rules that this collection has. */
+  ImmutableSet<Rule> getRules();
+
+  /** Invalidates any caches present in this collection. */
+  void invalidateCaches();
+}

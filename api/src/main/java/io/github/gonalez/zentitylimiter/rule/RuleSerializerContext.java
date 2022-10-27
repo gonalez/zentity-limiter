@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.rule;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+import io.github.gonalez.zentitylimiter.registry.ObjectRegistry;
+
+/** The context to serialize and deserialize {@link Rule}s. */
+public interface RuleSerializerContext extends ObjectRegistry {
+  static RuleSerializerContext of(ObjectRegistry objectRegistry) {
+    return new DelegatingRuleSerializerContext(objectRegistry);
+  }
+}

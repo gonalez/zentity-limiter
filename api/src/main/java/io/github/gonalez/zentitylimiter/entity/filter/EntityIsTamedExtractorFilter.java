@@ -13,7 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.entity.filter;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+import io.github.gonalez.zentitylimiter.entity.AbstractEntityExtractorFilter;
+import org.bukkit.entity.Tameable;
+
+public class EntityIsTamedExtractorFilter extends AbstractEntityExtractorFilter<Boolean, Tameable> {
+
+  @Override
+  public Class<Tameable> filterType() {
+    return Tameable.class;
+  }
+
+  @Override
+  public String getName() {
+    return "tamed";
+  }
+  
+  @Override
+  protected boolean doAllowed(Boolean tamed, Tameable type) {
+    return tamed == type.isTamed();
+  }
+
+  @Override
+  protected Class<Boolean> valueType() {
+    return boolean.class;
+  }
+}

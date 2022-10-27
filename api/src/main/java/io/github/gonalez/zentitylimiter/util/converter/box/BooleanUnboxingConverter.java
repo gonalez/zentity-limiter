@@ -13,7 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.util.converter.box;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+import io.github.gonalez.zentitylimiter.util.converter.ObjectConverter;
+
+/** Converter for unboxing Boolean into to its corresponding primitive type. */
+public class BooleanUnboxingConverter implements ObjectConverter<Boolean, Boolean> {
+
+  @Override
+  public Class<Boolean> requiredType() {
+    return Boolean.class;
+  }
+
+  @Override
+  public Class<Boolean> convertedType() {
+    return boolean.class;
+  }
+
+  @Override
+  public Boolean convert(Boolean key) {
+    return key;
+  }
+}

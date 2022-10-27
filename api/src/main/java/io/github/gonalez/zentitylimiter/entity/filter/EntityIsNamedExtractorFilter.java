@@ -13,7 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.entity.filter;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+import io.github.gonalez.zentitylimiter.entity.AbstractEntityExtractorFilter;
+import org.bukkit.entity.Entity;
+
+public class EntityIsNamedExtractorFilter extends AbstractEntityExtractorFilter<Boolean, Entity> {
+
+  @Override
+  public Class<Entity> filterType() {
+    return Entity.class;
+  }
+
+  @Override
+  public String getName() {
+    return "named";
+  }
+
+  @Override
+  protected boolean doAllowed(Boolean value, Entity type) {
+    return !value || type.getCustomName() != null;
+
+  }
+
+  @Override
+  protected Class<Boolean> valueType() {
+    return boolean.class;
+  }
+}

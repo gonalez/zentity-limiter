@@ -13,7 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.entity;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+import com.google.common.collect.ImmutableMap;
+import io.github.gonalez.zentitylimiter.registry.ObjectRegistry;
+import org.bukkit.entity.Entity;
+
+/** Responsible for extracting the proper filters that can be executed for an entity from a {@link RuleDescription}. */
+public interface EntityExtractorFilterExtractor {
+  ImmutableMap<EntityExtractorFilter<?>, ObjectRegistry> extractFilters(
+      RuleDescription ruleDescription, Entity entity);
+}

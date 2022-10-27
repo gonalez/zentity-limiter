@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+/** Available entity checking types. */
+public enum EntityCheckingType {
+  // Checks when a new entity spawns (CreatureSpawnEvent)
+  EVENT,
+  // Checks for all entities in a world every x interval
+  INTERVAL,
+}

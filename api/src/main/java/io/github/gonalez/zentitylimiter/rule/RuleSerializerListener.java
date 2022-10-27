@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.rule;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+/** Interface invoked when serializing and deserializing rules via the {@link RuleSerializer}. */
+public interface RuleSerializerListener {
+  default void onSerialize(Rule rule, RuleSerializerContext context) {}
+  default void onDeserialize(Rule rule, RuleSerializerContext context) {}
+}

@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.entity;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+import com.google.common.collect.ImmutableSet;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+
+/** Responsible for extracting a set of entities at a location and radius. */
+public interface EntityExtractor {
+  /** Extracts the entities found at the given location and radius. */
+  ImmutableSet<Entity> extractEntitiesInLocation(
+      Location location, double radius, RuleDescription ruleDescription);
+}

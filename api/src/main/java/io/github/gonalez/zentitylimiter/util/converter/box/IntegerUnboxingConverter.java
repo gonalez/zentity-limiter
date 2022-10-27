@@ -13,7 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.util.converter.box;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+import io.github.gonalez.zentitylimiter.util.converter.ObjectConverter;
+
+/** Converter for unboxing Integer into to its corresponding primitive type. */
+public class IntegerUnboxingConverter implements ObjectConverter<Integer, Integer> {
+
+  @Override
+  public Class<Integer> requiredType() {
+    return Integer.class;
+  }
+
+  @Override
+  public Class<Integer> convertedType() {
+    return int.class;
+  }
+
+  @Override
+  public Integer convert(Integer key) {
+    return key;
+  }
+}

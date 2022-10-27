@@ -14,6 +14,26 @@
  * limitations under the License.
  */
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+package io.github.gonalez.zentitylimiter.util.converter;
+
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
+
+@SuppressWarnings("unchecked")
+public class ImmutableMapConverter<K, V> implements ObjectConverter<Map<K, V>, ImmutableMap<K, V>> {
+  @Override
+  public Class<Map<K, V>> requiredType() {
+    return (Class<Map<K, V>>) ((Class<?>) Map.class);
+  }
+
+  @Override
+  public Class<ImmutableMap<K, V>> convertedType() {
+    return (Class<ImmutableMap<K, V>>) ((Class<?>) ImmutableMap.class);
+  }
+
+  @Override
+  public ImmutableMap<K, V> convert(Map<K, V> key) {
+    return ImmutableMap.copyOf(key);
+  }
+}

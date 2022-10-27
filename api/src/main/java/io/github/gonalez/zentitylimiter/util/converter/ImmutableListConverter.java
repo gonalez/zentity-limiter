@@ -13,7 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zentitylimiter.util.converter;
 
-rootProject.name = 'zentity-limiter'
-include 'api'
-include 'bukkit'
+import com.google.common.collect.ImmutableList;
+
+import java.util.List;
+
+@SuppressWarnings("unchecked")
+public class ImmutableListConverter<T> implements ObjectConverter<List<T>, ImmutableList<T>> {
+
+  @Override
+  public Class<List<T>> requiredType() {
+    return (Class<List<T>>) ((Class<?>) List.class);
+  }
+
+  @Override
+  public Class<ImmutableList<T>> convertedType() {
+    return (Class<ImmutableList<T>>) ((Class<?>) ImmutableList.class);
+  }
+
+  @Override
+  public ImmutableList<T> convert(List<T> key) {
+    return ImmutableList.copyOf(key);
+  }
+
+}
