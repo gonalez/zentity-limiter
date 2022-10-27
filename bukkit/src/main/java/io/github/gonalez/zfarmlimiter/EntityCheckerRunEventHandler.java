@@ -28,7 +28,6 @@ import io.github.gonalez.zfarmlimiter.entity.EntityRuleHelper;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
 import io.github.gonalez.zfarmlimiter.rule.RuleCollection;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 
 // <internal>
 class EntityCheckerRunEventHandler implements EntityHandler {
@@ -48,18 +47,15 @@ class EntityCheckerRunEventHandler implements EntityHandler {
             }
           });
 
-  private final ImmutableSet<EntityType> excludedEntityTypes;
   private final EntityChecker entityChecker;
 
   private final RuleCollection ruleCollection;
   private final EntityRuleHelper entityRuleHelper;
 
   public EntityCheckerRunEventHandler(
-      ImmutableSet<EntityType> excludedEntityTypes,
       EntityChecker entityChecker,
       RuleCollection ruleCollection,
       EntityRuleHelper entityRuleHelper) {
-    this.excludedEntityTypes = checkNotNull(excludedEntityTypes);
     this.entityChecker = checkNotNull(entityChecker);
     this.ruleCollection = checkNotNull(ruleCollection);
     this.entityRuleHelper = checkNotNull(entityRuleHelper);
@@ -68,10 +64,6 @@ class EntityCheckerRunEventHandler implements EntityHandler {
 
   @Override
   public void handle(Entity entity) {
-    boolean isExcluded = excludedEntityTypes.contains(entity.getType());
-    if (isExcluded) {
-      return;
-    }
     ImmutableSet<Rule> compatibleEntityRules = ENTITY_COMPATIBLE_RULES.getUnchecked(entity);
     for (Rule rule : compatibleEntityRules) {
       try {

@@ -17,7 +17,6 @@ package io.github.gonalez.zfarmlimiter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import io.github.gonalez.zfarmlimiter.entity.*;
 import io.github.gonalez.zfarmlimiter.rule.FileWritingRuleSerializer;
 import io.github.gonalez.zfarmlimiter.rule.Rule;
@@ -29,7 +28,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,7 +38,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 /** The main class of the ZFarm Limiter plugin. */
 public class ZFarmLimiterPlugin extends JavaPlugin {
@@ -56,17 +53,6 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
 
     fileConfiguration.options().copyDefaults(true);
     saveConfig();
-
-    ImmutableSet.Builder<EntityType> excludedEntityTypesBuilder = ImmutableSet.builder();
-    for (String excludedEntityName : fileConfiguration.getStringList("excludedEntityTypes")) {
-      try {
-        EntityType entityType = EntityType.valueOf(excludedEntityName);
-        excludedEntityTypesBuilder.add(entityType);
-      } catch (IllegalArgumentException exception) {
-        getLogger().log(Level.WARNING,
-            "excludedEntityTypes: no entity type was found with name %s, skipping", excludedEntityName);
-      }
-    }
 
     try {
       ZFarmLimiterPluginVariables.Builder variablesBuilder = ZFarmLimiterPluginVariables.newBuilder();
@@ -101,7 +87,6 @@ public class ZFarmLimiterPlugin extends JavaPlugin {
 
       EntityCheckerRunEventHandler entityCheckingPluginEventHandler =
           new EntityCheckerRunEventHandler(
-              excludedEntityTypesBuilder.build(),
               entityChecker,
               ruleCollection,
               BasicEntityRuleHelper.INSTANCE);
