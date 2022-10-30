@@ -20,8 +20,7 @@ import static org.mockito.Mockito.*;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import io.github.gonalez.zentitylimiter.entity.filter.EntityTypeExtractorFilter;
-import io.github.gonalez.zentitylimiter.registry.ObjectRegistry;
+import io.github.gonalez.zentitylimiter.rule.Rule;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -38,23 +37,21 @@ public class EntityExtractorTest {
   @Mock private World world;
 
   @Test
-  public void testRecursivelyEntityExtractorWithFilters() {
+  public void testSimpleEntityExtractor() {
     int numEntities = 5;
     Location location = new Location(world, 0, 0, 0);
 
     ImmutableSet.Builder<Entity> entityBuilder = ImmutableSet.builder();
     for (int i = 0; i < numEntities; i++) {
       entityBuilder.add(mockEntity(EntityType.ZOMBIE));
-      entityBuilder.add(mockEntity(EntityType.BAT));
     }
 
     when(world.getNearbyEntities(any(), anyDouble(), anyDouble(), anyDouble()))
         .thenReturn(entityBuilder.build());
 
     RuleDescription ruleDescription = mock(RuleDescription.class);
-    when(ruleDescription.getFilters()).thenReturn(
-        ImmutableMap.of(new EntityTypeExtractorFilter(),
-            ObjectRegistry.of("entity_type", EntityType.class, EntityType.ZOMBIE)));
+    when(ruleDescription.getFilters()).thenReturn(ImmutableMap.of());
+    when(ruleDescription.getRule()).thenReturn(Rule.newBuilder().build());
 
     assertEquals(
         numEntities,
@@ -64,7 +61,7 @@ public class EntityExtractorTest {
                     ruleDescription).size());
   }
 
-  private static Entity mockEntity(EntityType entityType) {
+  static Entity mockEntity(EntityType entityType) {
     Entity entity = mock(Entity.class);
     when(entity.getType()).thenReturn(entityType);
     return entity;

@@ -15,6 +15,9 @@
  */
 package io.github.gonalez.zentitylimiter.entity;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.github.gonalez.zentitylimiter.entity.filter.EntityIsNamedExtractorFilter;
@@ -22,25 +25,63 @@ import io.github.gonalez.zentitylimiter.entity.filter.EntityIsTamedExtractorFilt
 import io.github.gonalez.zentitylimiter.entity.filter.EntityTypeExtractorFilter;
 
 import javax.annotation.Nullable;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.ExecutionException;
 
 /** Helper class for {@link EntityExtractorFilter}s. */
 public final class EntityExtractorFilters {
-  private static final ImmutableList<EntityExtractorFilter<?>> DEFAULT_FILTERS =
-      ImmutableList.of(
-          new EntityTypeExtractorFilter(),
-          new EntityIsTamedExtractorFilter(),
-          new EntityIsNamedExtractorFilter());
 
-  private static final ImmutableMap<String, EntityExtractorFilter<?>> BY_NAME =
-      ImmutableMap.copyOf(DEFAULT_FILTERS.stream().collect(
-          Collectors.toMap(EntityExtractorFilter::getName, Function.identity())));
+  /** Cache of filters by its class. */
+  private static final LoadingCache<
+          Class<? extends EntityExtractorFilter<?>>, EntityExtractorFilter<?>>
+      FILTER_LOADING_CACHE =
+          CacheBuilder.newBuilder()
+              .build(new CacheLoader<Class<? extends EntityExtractorFilter<?>>, EntityExtractorFilter<?>>() {
+                @Override
+                public EntityExtractorFilter<?> load(
+                    Class<? extends EntityExtractorFilter<?>> key) {
+                  return loadEntityExtractorFilter(key);
+                }
+              });
+
+  private static EntityExtractorFilter<?> loadEntityExtractorFilter(
+      Class<? extends EntityExtractorFilter<?>> entityExtractorFilterClass) {
+    try {
+      return entityExtractorFilterClass.getDeclaredConstructor().newInstance();
+    } catch (InstantiationException | IllegalAccessException |
+             NoSuchMethodException | InvocationTargetException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  @SuppressWarnings("unchecked") // safe
+  public static <T extends EntityExtractorFilter<?>> T getInstance(
+      Class<T> entityExtractorFilterClass) {
+    return (T) FILTER_LOADING_CACHE.getUnchecked(entityExtractorFilterClass);
+  }
 
   @Nullable
-  public static EntityExtractorFilter<?> findFilterForName(String filterName) {
-    return BY_NAME.get(filterName.toLowerCase());
+  public static EntityExtractorFilter<?> getInstanceForName(String name) {
+    final ImmutableMap<Class<? extends EntityExtractorFilter<?>>, EntityExtractorFilter<?>> all;
+    try {
+      all = FILTER_LOADING_CACHE.getAll(BUILT_IN);
+    } catch (ExecutionException e) {
+      throw new IllegalStateException(e);
+    }
+    for (EntityExtractorFilter<?> filter : all.values()) {
+      if (filter.getName().equals(name)) {
+        return filter;
+      }
+    }
+    return null;
   }
+
+  // Built in filters
+  private static final ImmutableList<Class<? extends EntityExtractorFilter<?>>> BUILT_IN =
+      ImmutableList.of(
+          EntityTypeExtractorFilter.class,
+          EntityIsTamedExtractorFilter.class,
+          EntityIsNamedExtractorFilter.class);
 
   private EntityExtractorFilters() {}
 }

@@ -15,13 +15,13 @@
  */
 package io.github.gonalez.zentitylimiter.entity.filter;
 
-import io.github.gonalez.zentitylimiter.entity.AbstractEntityExtractorFilter;
+import io.github.gonalez.zentitylimiter.entity.ExtraEntityExtractorFilter;
 import io.github.gonalez.zentitylimiter.entity.EntityExtractorFilter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
 /** A {@link EntityExtractorFilter} which compares whether the entity type is compatible with another. */
-public class EntityTypeExtractorFilter extends AbstractEntityExtractorFilter<EntityType, Entity> {
+public class EntityTypeExtractorFilter extends ExtraEntityExtractorFilter<EntityType, Entity> {
 
   @Override
   public Class<Entity> filterType() {

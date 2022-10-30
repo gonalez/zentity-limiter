@@ -16,10 +16,10 @@
 package io.github.gonalez.zentitylimiter.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.github.gonalez.zentitylimiter.entity.EntityExtractorFilters.*;
 import static io.github.gonalez.zentitylimiter.util.converter.MoreObjectConverters.convertClass;
 
 import com.google.common.collect.ImmutableMap;
+import io.github.gonalez.zentitylimiter.entity.filter.EntityTypeExtractorFilter;
 import io.github.gonalez.zentitylimiter.registry.ObjectRegistry;
 import io.github.gonalez.zentitylimiter.rule.Rule;
 import org.bukkit.entity.EntityType;
@@ -39,11 +39,12 @@ public class DefaultRuleDescription implements RuleDescription {
   public DefaultRuleDescription(Rule rule) {
     this.rule = checkNotNull(rule);
     for (String allowedEntity : rule.allowedEntities()) {
-      registerFilter(findFilterForName("entity_type"), EntityType.valueOf(allowedEntity));
+      registerFilter(EntityExtractorFilters.getInstance(EntityTypeExtractorFilter.class),
+          EntityType.valueOf(allowedEntity));
     }
     for (Map.Entry<String, Object> optionEntry : rule.options().entrySet()) {
       EntityExtractorFilter<?> maybeCreateFilter =
-          findFilterForName(optionEntry.getKey());
+          EntityExtractorFilters.getInstanceForName(optionEntry.getKey());
       if (maybeCreateFilter != null) {
         registerFilter(maybeCreateFilter, optionEntry.getValue());
       }

@@ -18,16 +18,10 @@ package io.github.gonalez.zentitylimiter.entity;
 import io.github.gonalez.zentitylimiter.registry.ObjectRegistry;
 
 /**
- * Adds an extra type {@code V}, useful if the implementation only needs a single value to do the necessary
- * comparisons. Hence, the allowed method becomes {@link #doAllowed} to be able to use {@code V} together
- * with {@code T}.
- *
- * <p>The code {@code V} argument passed to #doAllowed is determined from the object registry given when
- * calling #allowed, we look for the value using the name of this filter and valueType (V).
+ * {@link EntityExtractorFilter} that has an extra thing to check for allowed (@code V), useful if the
+ * subclass only needs a single value from the {@code objectRegistry} to do the necessary 'comparisons'.
  */
-public abstract class AbstractEntityExtractorFilter<V, T> implements EntityExtractorFilter<T> {
-  public AbstractEntityExtractorFilter() {}
-
+public abstract class ExtraEntityExtractorFilter<V, T> extends EntityExtractorFilter<T> {
   protected abstract boolean doAllowed(V value, T type);
 
   protected abstract Class<V> valueType();

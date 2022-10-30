@@ -15,11 +15,11 @@
  */
 package io.github.gonalez.zentitylimiter.entity.filter;
 
-import io.github.gonalez.zentitylimiter.entity.AbstractEntityExtractorFilter;
+import io.github.gonalez.zentitylimiter.entity.ExtraEntityExtractorFilter;
 import org.bukkit.entity.Entity;
 
 /** Filter that checks if the entity is named or not. */
-public class EntityIsNamedExtractorFilter extends AbstractEntityExtractorFilter<Boolean, Entity> {
+public class EntityIsNamedExtractorFilter extends ExtraEntityExtractorFilter<Boolean, Entity> {
 
   @Override
   public Class<Entity> filterType() {
@@ -33,7 +33,7 @@ public class EntityIsNamedExtractorFilter extends AbstractEntityExtractorFilter<
 
   @Override
   protected boolean doAllowed(Boolean value, Entity type) {
-    return !value || type.getCustomName() != null;
+    return value && type.getCustomName() != null;
 
   }
 

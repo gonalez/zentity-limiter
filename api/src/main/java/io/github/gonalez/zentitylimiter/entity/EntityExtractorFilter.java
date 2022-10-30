@@ -17,14 +17,16 @@ package io.github.gonalez.zentitylimiter.entity;
 
 import io.github.gonalez.zentitylimiter.registry.ObjectRegistry;
 
-/** Interface to restrict which entities can be extracted. */
-public interface EntityExtractorFilter<T> {
+/** Restricts which entities can be extracted. */
+public abstract class EntityExtractorFilter<T> {
+  protected EntityExtractorFilter() {}
+
   /** @return the type of thing that this filter applies on. */
-  Class<T> filterType();
+  public abstract Class<T> filterType();
 
   /** @return the name of this filter. */
-  String getName();
+  public abstract  String getName();
 
   /** @return {@code true} if the entity can be extracted. */
-  boolean allowed(ObjectRegistry objectRegistry, T type);
+  public abstract boolean allowed(ObjectRegistry objectRegistry, T type);
 }
