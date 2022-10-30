@@ -18,6 +18,7 @@ package io.github.gonalez.zentitylimiter.entity.filter;
 import io.github.gonalez.zentitylimiter.entity.AbstractEntityExtractorFilter;
 import org.bukkit.entity.Tameable;
 
+/** Filter that checks if the entity is tamed or not. */
 public class EntityIsTamedExtractorFilter extends AbstractEntityExtractorFilter<Boolean, Tameable> {
 
   @Override

@@ -16,12 +16,23 @@
 package io.github.gonalez.zentitylimiter.rule;
 
 import com.google.common.collect.ImmutableSet;
+import org.bukkit.entity.Entity;
+
+import javax.annotation.Nullable;
 
 /** A set of {@link Rule}s. */
 public interface RuleCollection {
+  /** Interface for finding the rules of an entity. */
+  interface RuleCollectionFinder {
+
+    @Nullable
+    Rule findRule(Entity entity);
+  }
+
   /** @return all rules that this collection has. */
   ImmutableSet<Rule> getRules();
 
   /** Invalidates any caches present in this collection. */
   void invalidateCaches();
+
 }

@@ -19,6 +19,8 @@ import io.github.gonalez.zentitylimiter.rule.Rule;
 import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;
 
+import javax.annotation.Nullable;
+
 /** {@inheritDoc}. */
 public interface EntityChecker {
   /** The result of {@link #check(Entity, Rule)}. */
@@ -27,6 +29,8 @@ public interface EntityChecker {
     SUCCEED,
     // Some error or failure
     FAILED,
+    // No rule was found
+    RULE_NOT_FOUND,
     // Event was cancelled
     EVENT_CANCELLED,
     // The number of entities found is less than the limit set by the rule
@@ -34,10 +38,11 @@ public interface EntityChecker {
   }
 
   /**
-   * Checks the given entity for the given rule, looks for entities near the radius set by the rule and checks
-   * if there are more than the limit set by the rule, and handles accordingly.
+   * Checks the given entity for the given rule, looks for entities near the radius set
+   * by the rule and checks if there are more than the limit set by the rule,
+   * and handles accordingly.
    */
-  ResultType check(Entity entity, Rule rule) throws EntityCheckerException;
+  ResultType check(Entity entity, @Nullable Rule rule);
 
   /**
    * Initializes this checker with the given plugin, it may not be necessary to call this method,

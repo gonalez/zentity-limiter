@@ -15,6 +15,9 @@
  */
 package io.github.gonalez.zentitylimiter.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import io.github.gonalez.zentitylimiter.rule.RuleCollection;
 import org.bukkit.entity.Entity;
 
 import java.util.ArrayList;
@@ -31,12 +34,17 @@ public class RunnableEntityCheckingTask implements EntityCheckingTask, Runnable 
   private volatile boolean started = false;
 
   private final List<Callback> callbacks = new ArrayList<>();
-  private final List<EntityHandler> entityHandlers = new ArrayList<>();
+  private final List<EntityChecker> entityCheckers = new ArrayList<>();
+
+  private final RuleCollection.RuleCollectionFinder ruleCollectionFinder;
 
   private final TimeUnit unit;
   private final long interval;
 
-  public RunnableEntityCheckingTask(TimeUnit unit, long interval) {
+  public RunnableEntityCheckingTask(
+      RuleCollection.RuleCollectionFinder ruleCollectionFinder,
+      TimeUnit unit, long interval) {
+    this.ruleCollectionFinder = checkNotNull(ruleCollectionFinder);
     this.unit = unit;
     this.interval = interval;
 
@@ -87,8 +95,8 @@ public class RunnableEntityCheckingTask implements EntityCheckingTask, Runnable 
   }
 
   @Override
-  public void addHandler(EntityHandler entityHandler) {
-    entityHandlers.add(entityHandler);
+  public void addEntityChecker(EntityChecker entityChecker) {
+    entityCheckers.add(entityChecker);
   }
 
   @Override
@@ -105,13 +113,14 @@ public class RunnableEntityCheckingTask implements EntityCheckingTask, Runnable 
           // the instance for determining for how long we have to wait until next check. Note that the thread
           Thread.sleep(unit.toMillis(interval));
         }
+
         Entity entity = entities.takeFirst();
-        for (EntityHandler entityHandler : entityHandlers) {
-          entityHandler.handle(entity);
+        for (EntityChecker entityChecker : entityCheckers) {
+          entityChecker.check(entity, ruleCollectionFinder.findRule(entity));
         }
       }
-    } catch (InterruptedException interruptedException) {
-      // just ignore
+    } catch (InterruptedException ignored) {
+      // Ignored
     }
   }
 }

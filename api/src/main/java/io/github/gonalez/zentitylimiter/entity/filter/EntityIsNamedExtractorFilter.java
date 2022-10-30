@@ -18,6 +18,7 @@ package io.github.gonalez.zentitylimiter.entity.filter;
 import io.github.gonalez.zentitylimiter.entity.AbstractEntityExtractorFilter;
 import org.bukkit.entity.Entity;
 
+/** Filter that checks if the entity is named or not. */
 public class EntityIsNamedExtractorFilter extends AbstractEntityExtractorFilter<Boolean, Entity> {
 
   @Override

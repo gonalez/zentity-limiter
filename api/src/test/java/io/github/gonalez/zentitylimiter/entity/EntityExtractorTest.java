@@ -32,7 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /** Tests for {@link EntityExtractor}. */
-@ExtendWith({MockitoExtension.class})
+@ExtendWith(MockitoExtension.class)
 public class EntityExtractorTest {
 
   @Mock private World world;

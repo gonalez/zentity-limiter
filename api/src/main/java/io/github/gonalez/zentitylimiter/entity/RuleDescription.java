@@ -26,7 +26,7 @@ public interface RuleDescription {
   /** Provides thar provides {@link RuleDescription}s for a given rule. */
   interface Provider {
     @Nullable
-    RuleDescription provide(Rule rule);
+    RuleDescription provide(@Nullable Rule rule);
   }
 
   /** The rule for which this description is intended for. */

@@ -38,6 +38,9 @@ public class CachingRuleDescriptionProvider implements RuleDescription.Provider 
   @Nullable
   @Override
   public RuleDescription provide(Rule rule) {
+    if (rule == null) {
+      return null;
+    }
     ruleDescriptionCache.computeIfAbsent(rule, computeRuleDescriptionFunction);
     return ruleDescriptionCache.get(rule);
   }

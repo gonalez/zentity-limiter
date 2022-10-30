@@ -17,21 +17,33 @@ package io.github.gonalez.zentitylimiter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import io.github.gonalez.zentitylimiter.entity.EntityHandler;
+import io.github.gonalez.zentitylimiter.entity.EntityChecker;
+import io.github.gonalez.zentitylimiter.rule.RuleCollection;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 /** Subscribes to all necessary events for {@link io.github.gonalez.zentitylimiter.EntityCheckingType#EVENT} functionality. */
-public class EntityLimiterListener implements Listener {
-  private final EntityHandler entityHandler;
+class EntityLimiterListener implements Listener {
+  private final RuleCollection.RuleCollectionFinder ruleCollectionFinder;
+  private final EntityChecker entityChecker;
 
-  public EntityLimiterListener(EntityHandler entityHandler) {
-    this.entityHandler = checkNotNull(entityHandler);
+  public EntityLimiterListener(
+      RuleCollection.RuleCollectionFinder ruleCollectionFinder,
+      EntityChecker entityChecker) {
+    this.ruleCollectionFinder = checkNotNull(ruleCollectionFinder);
+    this.entityChecker = checkNotNull(entityChecker);
+  }
+
+  private EntityChecker.ResultType checkEntity(Entity entity) {
+    return entityChecker.check(entity, ruleCollectionFinder.findRule(entity));
   }
 
   @EventHandler
-  public void onCreatureSpawn(CreatureSpawnEvent creatureSpawnEvent) {
-    entityHandler.handle(creatureSpawnEvent.getEntity());
+  public void onItemSpawn(CreatureSpawnEvent creatureSpawnEvent) {
+    if (creatureSpawnEvent.isCancelled())
+      return;
+    checkEntity(creatureSpawnEvent.getEntity());
   }
 }

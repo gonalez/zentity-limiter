@@ -45,5 +45,5 @@ public interface EntityCheckingTask {
   void addEntityForChecking(Entity entity);
 
   /** Adds a new handler, used when checking new entities in this task. */
-  void addHandler(EntityHandler entityHandler);
+  void addEntityChecker(EntityChecker entityChecker);
 }

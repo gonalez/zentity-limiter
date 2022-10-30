@@ -22,8 +22,7 @@ import io.github.gonalez.zentitylimiter.rule.Rule;
 import org.bukkit.entity.Entity;
 
 /**
- * Invokes the {@code handlers} for each of the
- * {@link #analyzeExceededEntities(Rule, Entity, ImmutableList) analyzed entities.}
+ * Invokes the {@code handlers} for each of the {@link #analyzeExceededEntities analyzed entities}.
  */
 public class EntityHandlingEntityChecker extends AbstractEntityChecker {
   private final ImmutableList<EntityHandler> handlers;
@@ -36,8 +35,7 @@ public class EntityHandlingEntityChecker extends AbstractEntityChecker {
   }
 
   @Override
-  protected ResultType analyzeExceededEntities(
-      Rule rule, Entity checked, ImmutableList<Entity> entities) throws EntityCheckerException {
+  protected ResultType analyzeExceededEntities(Rule rule, Entity checked, ImmutableList<Entity> entities)  {
     for (Entity entity : entities) {
       for (EntityHandler entityHandler : handlers) {
         entityHandler.handle(entity);

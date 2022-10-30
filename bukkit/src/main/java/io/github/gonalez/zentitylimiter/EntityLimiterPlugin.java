@@ -85,22 +85,22 @@ public class EntityLimiterPlugin extends JavaPlugin {
 
       this.pluginVariables = variablesBuilder.build();
 
-      EntityCheckerRunEventHandler entityCheckingPluginEventHandler =
-          new EntityCheckerRunEventHandler(
-              entityChecker,
-              ruleCollection,
-              BasicEntityRuleHelper.INSTANCE);
+      RuleCollection.RuleCollectionFinder ruleCollectionFinder =
+          new AllowedEntitiesRuleCollectionFinder(ruleCollection);
 
       PluginManager pluginManager = getServer().getPluginManager();
       switch (EntityCheckingType.valueOf(
-          fileConfiguration.getString("checking.type").toUpperCase(Locale.UK))) {
+          fileConfiguration.getString("checking.type").toUpperCase(Locale.US))) {
         case EVENT:
           pluginManager.registerEvents(
-              new EntityLimiterListener(entityCheckingPluginEventHandler), this);
+              new EntityLimiterListener(ruleCollectionFinder, entityChecker), this);
           break;
         case INTERVAL:
           EntityCheckingTask entityCheckingTask =
-              new RunnableEntityCheckingTask(TimeUnit.SECONDS, fileConfiguration.getInt("checking.interval"));
+              new RunnableEntityCheckingTask(
+                  ruleCollectionFinder,
+                  TimeUnit.SECONDS,
+                  fileConfiguration.getInt("checking.interval", 60));
           disableActions.add(entityCheckingTask::shutdown);
           for (Rule rule : ruleCollection.getRules()) {
             entityCheckingTask.addCallback(new EntityCheckingTask.Callback() {
@@ -127,7 +127,7 @@ public class EntityLimiterPlugin extends JavaPlugin {
                 }
               }
             });
-            entityCheckingTask.addHandler(entityCheckingPluginEventHandler);
+            entityCheckingTask.addEntityChecker(entityChecker);
           }
           entityCheckingTask.start();
           break;

@@ -17,7 +17,6 @@ package io.github.gonalez.zentitylimiter.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.github.gonalez.zentitylimiter.entity.event.EntityCheckEvent;
@@ -56,7 +55,7 @@ public abstract class AbstractEntityChecker implements EntityChecker {
    * @see Rule#maxAmount()
    */
   protected abstract ResultType analyzeExceededEntities(
-      Rule rule, Entity checked, ImmutableList<Entity> entities) throws EntityCheckerException;
+      Rule rule, Entity checked, ImmutableList<Entity> entities);
 
   /** Calls the given {@code event}, using the plugin manager. */
   private <T extends Event> T callEvent(T event) {
@@ -65,15 +64,10 @@ public abstract class AbstractEntityChecker implements EntityChecker {
   }
 
   @Override
-  public ResultType check(Entity entity, Rule rule) throws EntityCheckerException {
-    Preconditions.checkState(rule != null,
-        "rule cannot be null");
+  public ResultType check(Entity entity, Rule rule) {
     RuleDescription ruleDescription = ruleDescriptionProvider.provide(rule);
     if (ruleDescription == null) {
-      throw EntityCheckerException.newBuilder()
-          .withMessage("No rule description was found for rule " + rule)
-          .withExceptionCode(EntityCheckerExceptionCode.NO_RULE_DESCRIPTION_FOUND)
-          .build();
+      return ResultType.RULE_NOT_FOUND;
     }
 
     if (pluginManager != null) {
