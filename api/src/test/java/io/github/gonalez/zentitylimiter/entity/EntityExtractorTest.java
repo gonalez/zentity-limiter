@@ -56,7 +56,7 @@ public class EntityExtractorTest {
     assertEquals(
         numEntities,
         new RecursivelyEntityExtractor(
-            new TypeEqualsEntityExtractorFilterExtractor(entity -> entity.getType().getEntityClass()))
+            new ClassEntityExtractorFilterExtractor(entity -> entity.getType().getEntityClass()))
                 .extractEntitiesInLocation(location, 5,
                     ruleDescription).size());
   }

@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableMap;
 import io.github.gonalez.zentitylimiter.registry.ObjectRegistry;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,16 +29,16 @@ import java.util.Set;
 import java.util.function.Function;
 
 /**
- * Simple {@link EntityExtractorFilterExtractor} which checks if a specific class is assignable for each of the
- * rule description filters, and adds it to the extraction, the class is determined by the {@code classFunction}.
+ * Add the filters of the rule description to the entity if the filter {@link EntityExtractorFilter#filterType()}
+ * is assignable to the {@link EntityType#getEntityClass() entity class}.
  */
-public class TypeEqualsEntityExtractorFilterExtractor implements EntityExtractorFilterExtractor {
+public class ClassEntityExtractorFilterExtractor implements EntityExtractorFilterExtractor {
   private final HashMap<Class<?>, Set<Class<?>>> allowedTypes = new HashMap<>();
   private final HashMap<Class<?>, Set<Class<?>>> nonAllowedTypes = new HashMap<>();
 
   private final Function<Entity, Class<?>> classFunction;
 
-  public TypeEqualsEntityExtractorFilterExtractor(
+  public ClassEntityExtractorFilterExtractor(
       Function<Entity, Class<?>> classFunction) {
     this.classFunction = checkNotNull(classFunction);
   }
@@ -55,16 +56,11 @@ public class TypeEqualsEntityExtractorFilterExtractor implements EntityExtractor
     ImmutableMap.Builder<EntityExtractorFilter<?>, ObjectRegistry> builder = ImmutableMap.builder();
     for (Map.Entry<EntityExtractorFilter<?>,
         ObjectRegistry> entry : ruleDescription.getFilters().entrySet()) {
-      EntityExtractorFilter<?> filter = entry.getKey();
-      Class<?> filterType = filter.filterType();
-
+      Class<?> filterType = entry.getKey().filterType();
       if (nonAllowedClasses.contains(filterType)) {
         continue;
       }
-
-      if (allowedClasses.contains(filter.filterType())) {
-        builder.put(entry);
-      } else {
+      if (!allowedClasses.contains(filterType)) {
         if (filterType.isAssignableFrom(findClass)) {
           allowedClasses.add(findClass);
           builder.put(entry);

@@ -78,7 +78,7 @@ public class EntityLimiterPlugin extends JavaPlugin {
       EntityChecker entityChecker = new EntityHandlingEntityChecker(
           ruleDescriptionProvider,
           new RecursivelyEntityExtractor(
-              new TypeEqualsEntityExtractorFilterExtractor(entity -> entity.getType().getEntityClass())),
+              new ClassEntityExtractorFilterExtractor(entity -> entity.getType().getEntityClass())),
           ImmutableList.of(Entity::remove));
       variablesBuilder.setEntityChecker(entityChecker);
       entityChecker.init(this);

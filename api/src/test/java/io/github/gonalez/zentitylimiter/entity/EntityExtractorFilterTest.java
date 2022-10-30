@@ -51,7 +51,7 @@ public class EntityExtractorFilterTest {
   public static void setUp() {
     entity = mockEntity(EntityType.COW);
     entityExtractor = new RecursivelyEntityExtractor(
-        new TypeEqualsEntityExtractorFilterExtractor(entity -> entity.getType().getEntityClass()));
+        new ClassEntityExtractorFilterExtractor(entity -> entity.getType().getEntityClass()));
   }
 
   /** Tests {@link EntityIsNamedExtractorFilter}. */
