@@ -21,7 +21,7 @@ import io.github.gonalez.zentitylimiter.rule.Rule;
 
 import javax.annotation.Nullable;
 
-/** Contains more information about an {@link io.github.gonalez.zentitylimiter.rule.Rule}. */
+/** Contains more information about an {@link Rule}. */
 public interface RuleDescription {
   /** Provides thar provides {@link RuleDescription}s for a given rule. */
   interface Provider {

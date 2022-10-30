@@ -17,6 +17,7 @@ package io.github.gonalez.zentitylimiter.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import io.github.gonalez.zentitylimiter.rule.Rule;
 import io.github.gonalez.zentitylimiter.rule.RuleCollection;
 import org.bukkit.entity.Entity;
 
@@ -31,8 +32,6 @@ public class RunnableEntityCheckingTask implements EntityCheckingTask, Runnable 
   private final BlockingDeque<Entity> entities;
   private final Thread thread;
 
-  private volatile boolean started = false;
-
   private final List<Callback> callbacks = new ArrayList<>();
   private final List<EntityChecker> entityCheckers = new ArrayList<>();
 
@@ -40,6 +39,9 @@ public class RunnableEntityCheckingTask implements EntityCheckingTask, Runnable 
 
   private final TimeUnit unit;
   private final long interval;
+
+  private volatile boolean started = false;
+
 
   public RunnableEntityCheckingTask(
       RuleCollection.RuleCollectionFinder ruleCollectionFinder,
@@ -103,20 +105,19 @@ public class RunnableEntityCheckingTask implements EntityCheckingTask, Runnable 
   public void run() {
     try {
       while (isStarted()) {
-        // If the queue is empty, execute the onAllEntitiesChecked callbacks and sleep the thread to wait a little
-        // for next execution.
+        // If the queue is empty, execute #onAllEntitiesChecked callbacks. This is mostly useful
+        // for adding new entities for being checked at next execution
         if (entities.isEmpty()) {
-          // Run onAllEntitiesChecked callbacks, useful to add new entities to this task.
           callbacks.forEach(Callback::onAllEntitiesChecked);
 
-          // Sleep the thread before checking again, we use the unit and interval given when constructing
-          // the instance for determining for how long we have to wait until next check. Note that the thread
+          // Sleep the thread before checking again, uses the instance {@code unit} and {code interval}
           Thread.sleep(unit.toMillis(interval));
         }
 
         Entity entity = entities.takeFirst();
+        Rule rule = ruleCollectionFinder.findRule(entity);
         for (EntityChecker entityChecker : entityCheckers) {
-          entityChecker.check(entity, ruleCollectionFinder.findRule(entity));
+          entityChecker.check(entity, rule);
         }
       }
     } catch (InterruptedException ignored) {

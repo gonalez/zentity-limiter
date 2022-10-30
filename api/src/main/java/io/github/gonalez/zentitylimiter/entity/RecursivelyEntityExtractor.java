@@ -17,12 +17,15 @@ package io.github.gonalez.zentitylimiter.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import io.github.gonalez.zentitylimiter.registry.ObjectRegistry;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -61,11 +64,7 @@ public class RecursivelyEntityExtractor implements EntityExtractor {
         continue;
       }
       // Checks if the entity passes all the necessary filters
-      boolean entityIsAllowed =
-          filterExtractor.extractFilters(ruleDescription, entity)
-              .entrySet().stream()
-              .allMatch(filter -> ((EntityExtractorFilter)filter.getKey()).allowed(filter.getValue(), entity));
-      if (!entityIsAllowed) {
+      if (!isEntityAllowed(entity, filterExtractor.extractFilters(ruleDescription, entity))) {
         continue;
       }
       entities.add(entity);
@@ -75,5 +74,16 @@ public class RecursivelyEntityExtractor implements EntityExtractor {
       }
     }
     return ImmutableSet.copyOf(entities);
+  }
+
+  private static boolean isEntityAllowed(
+      Entity entity, ImmutableMap<EntityExtractorFilter<?>, ObjectRegistry> filters) {
+    for (Map.Entry<EntityExtractorFilter<?>, ObjectRegistry> filterEntry : filters.entrySet()) {
+      EntityExtractorFilter entityExtractorFilter = filterEntry.getKey();
+      if (!entityExtractorFilter.allowed(filterEntry.getValue(), entity)) {
+        return false;
+      }
+    }
+    return true;
   }
 }
