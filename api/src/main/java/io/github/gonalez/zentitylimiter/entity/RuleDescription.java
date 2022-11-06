@@ -23,8 +23,9 @@ import javax.annotation.Nullable;
 
 /** Contains more information about an {@link Rule}. */
 public interface RuleDescription {
-  /** Provides thar provides {@link RuleDescription}s for a given rule. */
+  /** Provides the {@link RuleDescription} of a rule. */
   interface Provider {
+
     @Nullable
     RuleDescription provide(@Nullable Rule rule);
   }

@@ -15,17 +15,18 @@
  */
 package io.github.gonalez.zentitylimiter.entity;
 
-import io.github.gonalez.zentitylimiter.rule.Rule;
 import org.bukkit.entity.Entity;
 
 /**
- * A {@link EntityCheckingTask} is responsible for {@link EntityChecker#check(Entity, Rule) checking entities},
- * consecutively every {@link #intervalMs() interval}. Use the method {@link #addEntityForChecking(Entity)}
- * to add a new entity to be checked, note that it is not guaranteed that the entity will be checked immediately.
+ * A {@link EntityCheckingTask} is responsible for {@link EntityChecker#check checking entities}, consecutively
+ * every {@link #intervalMs interval}. Use the method {@link #addEntityForChecking(Entity)} to add a new entity
+ * to be checked.
  */
 public interface EntityCheckingTask {
   /** Callbacks to execute when entities in this task. */
   interface Callback {
+
+    /** Called when there are no more pending entities to check. */
     default void onAllEntitiesChecked() {}
   }
 
@@ -41,9 +42,9 @@ public interface EntityCheckingTask {
   /** Adds a new callback into this task. */
   void addCallback(Callback callback);
 
-  /** Adds a new entity for being checking. */
+  /** Adds a new entity for being checked. */
   void addEntityForChecking(Entity entity);
 
-  /** Adds a new handler, used when checking new entities in this task. */
+  /** Adds a new entity checker. */
   void addEntityChecker(EntityChecker entityChecker);
 }

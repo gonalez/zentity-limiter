@@ -18,7 +18,7 @@ package io.github.gonalez.zentitylimiter.rule;
 import javax.annotation.Nullable;
 import java.io.IOException;
 
-/** Interface for serialize and deserialize rules. */
+/** Interface for serialize and deserialize {@link Rule}s. */
 public interface RuleSerializer {
   @FunctionalInterface
   interface Visitor {

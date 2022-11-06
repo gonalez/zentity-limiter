@@ -15,24 +15,48 @@
  */
 package io.github.gonalez.zentitylimiter.util.converter;
 
-import io.github.gonalez.zentitylimiter.util.converter.box.BooleanUnboxingConverter;
-import io.github.gonalez.zentitylimiter.util.converter.box.IntegerUnboxingConverter;
+import com.google.common.collect.ImmutableList;
+import com.google.gson.internal.Primitives;
+
+import java.util.stream.Collectors;
 
 /** Helper class to ease the use of {@link ObjectConverter}s. */
 public final class MoreObjectConverters {
   /** A {@link ObjectConverter.Registry} which adds converters for the immutable collections and more. */
   public static final ObjectConverter.Registry DEFAULT_REGISTRY =
       ObjectConverter.Registry.newBuilder()
+          // Guava
           .addConverter(new ImmutableListConverter<>())
           .addConverter(new ImmutableMapConverter<>())
-          // yaml configuration converters
+          // YAML configuration converters
           .addConverter(new MemorySectionMapConverter())
-          // wrapper type unboxing converters
-          .addConverter(new BooleanUnboxingConverter())
-          .addConverter(new IntegerUnboxingConverter())
+          // Primitives
+          .addConverter(
+              ImmutableList.of(boolean.class, int.class)
+                  .stream()
+                  .map(e ->
+                      new ObjectConverter<Object, Object>() {
+                        final Class<?> wrappedType = Primitives.wrap(e);
+
+                        @Override
+                        public Class requiredType() {
+                          return wrappedType;
+                        }
+
+                        @Override
+                        public Class convertedType() {
+                          return e;
+                        }
+
+                        @Override
+                        public Object convert(Object key) {
+                          return requiredType();
+                        }
+                      }).collect(Collectors.toList()))
           .build();
 
-  public static Class<?> convertClass(Class<?> clazz) {
+  /** @return the {@link ObjectConverter#convertedType()} for the given class. */
+  public static Class<?> getConvertedType(Class<?> clazz) {
     ObjectConverter<?, ?> objectConverter = DEFAULT_REGISTRY.findConverter(clazz, clazz);
     if (objectConverter != null) {
       return objectConverter.convertedType();

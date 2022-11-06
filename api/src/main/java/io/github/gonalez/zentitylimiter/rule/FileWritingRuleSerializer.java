@@ -44,11 +44,11 @@ public abstract class FileWritingRuleSerializer extends AbstractBuilderRuleSeria
 
   protected final File path;
 
-  protected ImmutableMap<Rule, RuleFileWritingInfo> rules;
-
   private final ImmutableMap<String, Rule> predefinedRules;
 
   private final boolean pathCreated;
+
+  protected ImmutableMap<Rule, RuleFileWritingInfo> rules;
 
   public FileWritingRuleSerializer(
       ObjectConverter.Registry objectConverterRegistry,
@@ -71,7 +71,7 @@ public abstract class FileWritingRuleSerializer extends AbstractBuilderRuleSeria
           RuleFileWritingInfo> builder = ImmutableMap.builder();
       builder.putAll(fetchRulesRecursively(path));
 
-      // Only set up the pre-defined rules if the path has been just created
+      // Load pre-defined rules only if the path has been just created
       if (pathCreated) {
         for (Map.Entry<String, Rule> ruleEntry : predefinedRules.entrySet()) {
           Rule rule = ruleEntry.getValue();
@@ -97,10 +97,6 @@ public abstract class FileWritingRuleSerializer extends AbstractBuilderRuleSeria
     return ObjectRegistry.newBuilder().add(RULE_FILE_CONTEXT_VALUE_NAME, File.class, file);
   }
 
-  /**
-   * Loads all the rules in the directory recursively,
-   * throws an {@code IOException} if cannot, load a rule.
-   */
   private ImmutableMap<Rule, RuleFileWritingInfo> fetchRulesRecursively(
       File dir) throws IOException {
     File[] files = dir.listFiles();

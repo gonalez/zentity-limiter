@@ -16,7 +16,7 @@
 package io.github.gonalez.zentitylimiter.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.github.gonalez.zentitylimiter.util.converter.MoreObjectConverters.convertClass;
+import static io.github.gonalez.zentitylimiter.util.converter.MoreObjectConverters.getConvertedType;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.gonalez.zentitylimiter.entity.filter.EntityTypeExtractorFilter;
@@ -55,7 +55,7 @@ public class DefaultRuleDescription implements RuleDescription {
   private void registerFilter(
       EntityExtractorFilter<?> filter, Object value) {
     ObjectRegistry objectRegistry =
-        ObjectRegistry.of(filter.getName(), (Class<? super Object>) convertClass(value.getClass()), value);
+        ObjectRegistry.of(filter.getName(), (Class<? super Object>) getConvertedType(value.getClass()), value);
     filters.put(filter, objectRegistry);
   }
 

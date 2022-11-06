@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import io.github.gonalez.zentitylimiter.registry.ObjectRegistry;
 
+/** {@link RuleSerializerContext} which delegates to another context. */
 public class DelegatingRuleSerializerContext implements RuleSerializerContext {
   private final ObjectRegistry objectRegistry;
 

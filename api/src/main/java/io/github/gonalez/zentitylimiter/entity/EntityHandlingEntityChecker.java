@@ -21,14 +21,13 @@ import com.google.common.collect.ImmutableList;
 import io.github.gonalez.zentitylimiter.rule.Rule;
 import org.bukkit.entity.Entity;
 
-/**
- * Invokes the {@code handlers} for each of the {@link #analyzeExceededEntities analyzed entities}.
- */
+/** Subclass of AbstractEntityChecker, which executes {@code handlers} for each analyzed entity. */
 public class EntityHandlingEntityChecker extends AbstractEntityChecker {
   private final ImmutableList<EntityHandler> handlers;
 
   public EntityHandlingEntityChecker(
-      RuleDescription.Provider ruleDescriptionProvider, EntityExtractor entityExtractor,
+      RuleDescription.Provider ruleDescriptionProvider,
+      EntityExtractor entityExtractor,
       ImmutableList<EntityHandler> handlers) {
     super(ruleDescriptionProvider, entityExtractor);
     this.handlers = checkNotNull(handlers);

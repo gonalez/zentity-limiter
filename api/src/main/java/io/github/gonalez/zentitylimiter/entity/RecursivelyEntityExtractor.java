@@ -32,8 +32,8 @@ import java.util.Set;
  * Basic implementation of {@link EntityExtractor}, which extracts the entities recursively, if there are
  * any entities in the given radius, we will search for new entities from this entity location.
  *
- * <p>Before extracting a new entity, the entity must go through the necessary {@code filters} that are
- * given when constructing this object, otherwise, the entity will not be selected to be extracted.
+ * <p>Before extracting a new entity, the entity must go through the necessary {@code filters} otherwise,
+ * the entity will not be selected to be extracted.
  */
 public class RecursivelyEntityExtractor implements EntityExtractor {
   private final EntityExtractorFilterExtractor filterExtractor;
@@ -47,7 +47,7 @@ public class RecursivelyEntityExtractor implements EntityExtractor {
       Location baseLocation, double radius, RuleDescription ruleDescription) {
     World world = checkNotNull(
         baseLocation.getWorld(),
-        "location world must not be bull");
+        "location 'world' must not be bull");
     Set<Entity> entityBuilder = new HashSet<>();
     return extractEntitiesRecursively(
         world, baseLocation, radius,

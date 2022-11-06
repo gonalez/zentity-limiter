@@ -25,7 +25,7 @@ public abstract class EntityExtractorFilter<T> {
   public abstract Class<T> filterType();
 
   /** @return the name of this filter. */
-  public abstract  String getName();
+  public abstract String getName();
 
   /** @return {@code true} if the entity can be extracted. */
   public abstract boolean allowed(ObjectRegistry objectRegistry, T type);

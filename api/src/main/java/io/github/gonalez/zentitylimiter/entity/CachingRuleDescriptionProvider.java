@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-/** Caching version of {@link RuleDescription.Provider}. */
+/** A RuleDescription provider which cache results. */
 public class CachingRuleDescriptionProvider implements RuleDescription.Provider {
   private final ConcurrentHashMap<Rule, RuleDescription> ruleDescriptionCache = new ConcurrentHashMap<>();
 

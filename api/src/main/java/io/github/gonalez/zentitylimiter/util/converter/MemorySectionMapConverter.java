@@ -20,7 +20,7 @@ import org.bukkit.configuration.MemorySection;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Support for converting yaml configuration (MemorySection) into map. */
+/** Support for converting yaml {@code MemorySection} into a map. */
 public class MemorySectionMapConverter implements ObjectConverter<MemorySection, Map> {
 
   @Override

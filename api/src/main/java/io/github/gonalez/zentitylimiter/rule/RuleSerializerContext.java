@@ -19,6 +19,7 @@ import io.github.gonalez.zentitylimiter.registry.ObjectRegistry;
 
 /** The context to serialize and deserialize {@link Rule}s. */
 public interface RuleSerializerContext extends ObjectRegistry {
+
   static RuleSerializerContext of(ObjectRegistry objectRegistry) {
     return new DelegatingRuleSerializerContext(objectRegistry);
   }

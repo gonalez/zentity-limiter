@@ -15,8 +15,11 @@
  */
 package io.github.gonalez.zentitylimiter.rule;
 
-/** Interface invoked when serializing and deserializing rules via the {@link RuleSerializer}. */
+/** Callbacks to be executed on {@link RuleSerializer}. */
 public interface RuleSerializerListener {
+  /** Called when serializing a rule. */
   default void onSerialize(Rule rule, RuleSerializerContext context) {}
+
+  /** Called when deserializing a rule. */
   default void onDeserialize(Rule rule, RuleSerializerContext context) {}
 }

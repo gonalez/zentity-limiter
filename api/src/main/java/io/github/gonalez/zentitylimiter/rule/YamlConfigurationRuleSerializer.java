@@ -30,13 +30,9 @@ import java.nio.file.Path;
 import java.util.Map;
 
 /**
- * A {@link YamlConfiguration} based rule serializer. The rule creation can fail if the configuration does not
- * have the necessary values, but the user can add default methods to the builder to add new fields, example,
- * if we add a new value to the rule,  "interval", we won't have this in the configuration, but we can call
- * this method with a default value in the {@code newBuilder} method.
+ * A {@link YamlConfiguration yaml} based rule serializer.
  *
- * <p>{@code saveConfig}, will save the rule into the config file, useful to update new possible values
- * of the rule, as explained before.
+ * <p>If {@code saveConfig} is true we will save the rule into the config path file.
  */
 public class YamlConfigurationRuleSerializer extends FileWritingRuleSerializer {
   private static final String YAML_EXTENSION = ".yml";
@@ -69,10 +65,7 @@ public class YamlConfigurationRuleSerializer extends FileWritingRuleSerializer {
       String keyName = target.getKey();
       if (yamlConfiguration.contains(keyName)) {
         Object configKeyValue = yamlConfiguration.get(keyName);
-        objectBuilder.add(
-            keyName,
-            (Class) target.getValue().getReturnType(),
-            configKeyValue);
+        objectBuilder.add(keyName, (Class) target.getValue().getReturnType(), configKeyValue);
       }
     }
     objectBuilder.add("file", File.class, file);
@@ -89,8 +82,7 @@ public class YamlConfigurationRuleSerializer extends FileWritingRuleSerializer {
     Rule rule =
         super.deserialize(context,
             Visitor.of((rule1, valueName, valueType, value)
-                ->
-                    yamlConfiguration.set(valueName, value)));
+                -> yamlConfiguration.set(valueName, value)));
     if (this.saveConfig) {
       yamlConfiguration.save(file);
     }

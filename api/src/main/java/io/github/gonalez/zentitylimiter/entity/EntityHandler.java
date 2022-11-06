@@ -19,6 +19,7 @@ import org.bukkit.entity.Entity;
 
 /** Interface for handling entities. */
 public interface EntityHandler {
+
   /** Handles the given entity. */
   void handle(Entity entity);
 }

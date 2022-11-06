@@ -21,6 +21,7 @@ import org.bukkit.entity.Entity;
 
 /** Responsible for extracting a set of entities at a location and radius. */
 public interface EntityExtractor {
+
   /** Extracts the entities found at the given location and radius. */
   ImmutableSet<Entity> extractEntitiesInLocation(
       Location location, double radius, RuleDescription ruleDescription);

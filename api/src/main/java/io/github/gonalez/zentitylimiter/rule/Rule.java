@@ -19,6 +19,7 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+
 @AutoValue
 public abstract class Rule {
   public static Builder newBuilder() {

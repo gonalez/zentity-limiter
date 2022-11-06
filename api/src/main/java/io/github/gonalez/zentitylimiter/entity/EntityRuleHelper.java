@@ -18,6 +18,8 @@ package io.github.gonalez.zentitylimiter.entity;
 import io.github.gonalez.zentitylimiter.rule.Rule;
 import org.bukkit.entity.Entity;
 
+/** Helper for rules.*/
 public interface EntityRuleHelper {
+
   boolean isCompatible(Rule rule, Entity entity);
 }

@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/** Registers a listener on the {@code ruleSerializer} to add a new rule to this collection when deserializing. */
 public class RuleSerializerListeningRuleCollection implements RuleCollection {
   private final Queue<Rule> serializedRules = new ConcurrentLinkedQueue<>();
 

@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
 
 /** A set of {@link Rule}s. */
 public interface RuleCollection {
-  /** Interface for finding the rules of an entity. */
+  /** Interface for finding the rule of an entity. */
   interface RuleCollectionFinder {
 
     @Nullable
@@ -34,5 +34,4 @@ public interface RuleCollection {
 
   /** Invalidates any caches present in this collection. */
   void invalidateCaches();
-
 }

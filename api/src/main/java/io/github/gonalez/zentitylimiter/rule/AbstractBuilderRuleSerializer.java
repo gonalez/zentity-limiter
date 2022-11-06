@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.internal.Primitives;
 import io.github.gonalez.zentitylimiter.util.converter.ObjectConverter;
 import io.github.gonalez.zentitylimiter.util.Pair;
 
@@ -39,11 +40,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Base class for {@link RuleSerializer} which creates rules from its builder, to use this class it is necessary
- * have a public, static method called {@code newBuilder} in the {@code ruleType} class, the builder must have
- * the same methods as the rule, so it is possible to build the rule thoroughly.
- * </p>
- * <b>NOTE: </b>This class is somewhat expensive to use since it uses reflection almost everywhere.
+ * Base class for {@link RuleSerializer} which creates rules from its builder. To use this implementation
+ * correctly the rule which will be serialized must have a static method called "newBuilder" with the
+ * necessary methods to build the rule. This implementation uses reflection which can be expensive.
  */
 public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
   // Defines which characters a rule builder method should start with
@@ -205,7 +204,7 @@ public abstract class AbstractBuilderRuleSerializer implements RuleSerializer {
       }
       return rule;
     } catch (IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException(e);
+      throw new IOException(e);
     }
   }
 

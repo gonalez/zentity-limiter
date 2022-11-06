@@ -36,6 +36,12 @@ public interface ObjectConverter<K, V> {
     interface Builder {
       <K, V> Builder addConverter(ObjectConverter<K, V> objectConverter);
 
+      default Builder addConverter(Iterable<ObjectConverter<?, ?>> objectConverters) {
+        for (ObjectConverter<?, ?> objectConverter : objectConverters)
+          addConverter(objectConverter);
+        return this;
+      }
+
       Registry build();
 
       final class DefaultObjectConverterBuilder implements Builder {

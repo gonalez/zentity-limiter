@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.github.gonalez.zentitylimiter.util.converter;
 
 import com.google.common.collect.ImmutableMap;
